@@ -1,0 +1,9 @@
+{
+  "name": "Biblion",
+  "short_name": "Biblion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
+  "icons": []
+}
