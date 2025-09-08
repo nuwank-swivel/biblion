@@ -168,6 +168,67 @@
 - Lightweight analytics (privacy-first), error reporting (Sentry) with PII scrubbing.
 - In-app diagnostics view for sync status and last errors.
 
+### CI/CD
+
+- Pipeline: GitHub Actions runs on pull requests and `main` pushes/tags.
+- Stages: install + cache → lint → type-check → test → build → (optional) PWA/Lighthouse audit → deploy.
+- Environments: preview deploys on PRs; production deploy on `main` (or semver tag).
+- Required checks: ESLint, TypeScript, unit tests, build success, bundle-size threshold.
+- Secrets: store deployment tokens as repository secrets; limit to environment scopes.
+
+Minimal CI example (`.github/workflows/ci.yml`):
+
+```
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm run typecheck --if-present
+      - run: npm test --if-present -- --ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dist
+          path: dist
+```
+
+Deploy options (pick one):
+
+- Firebase Hosting
+
+  - Preview: deploy on PR using channel previews; comment URL on PR.
+  - Production: deploy on `main` after CI passes.
+  - Secrets: `FIREBASE_TOKEN` (or use `setup-firebase` with service account), optional `SENTRY_AUTH_TOKEN` for release tracking.
+  - Minimal deploy step:
+    - `uses: FirebaseExtended/action-hosting-deploy@v0` with `channelId: preview` on PRs; no `channelId` on `main`.
+
+- Cloudflare Pages
+  - Preview: automatic preview on PR.
+  - Production: on `main`.
+  - Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_PROJECT_NAME`.
+  - Minimal deploy step:
+    - `uses: cloudflare/pages-action@v1` with `projectName`, `accountId`, `apiToken`.
+
+Governance & quality gates
+
+- Protect `main` with required status checks (lint, typecheck, tests, build, optional lighthouse).
+- Bundle size budget via `size-limit` or `rollup-plugin-visualizer` thresholds in CI.
+- Release management: tag `vX.Y.Z` to cut a release; CI can create a GitHub Release and upload build artifacts.
+- Rollback: keep previous deploys; use Firebase Hosting release history or Cloudflare Pages deployments to revert.
+
 ### Risks & Mitigations
 
 - Drive API quotas: cache aggressively; exponential backoff.
