@@ -1,12 +1,12 @@
-## Biblion Architecture (Frontend-only, Google Drive storage, PWA-ready)
+# Biblion Architecture (Frontend-only, Google Drive storage, PWA-ready)
 
-### Goals
+## Goals
 
 - Minimal backend: deliver as a static frontend; no server state.
 - Each user’s data stored in their own Google Drive via OAuth2 + Drive API.
 - Roadmap to PWA: offline-first, installable, background sync.
 
-### High-level Overview
+## High-level Overview
 
 - UI: React + TypeScript (Vite) app delivered via CDN. (Optionally Next.js static export if SSG/ISR is desired.)
 - Auth: Firebase Authentication (Google provider, PKCE under the hood) requesting Drive App Data scope; obtain Google OAuth access token for Drive calls.
@@ -14,7 +14,7 @@
 - Sync: Client maintains local cache (IndexedDB) and syncs with Google Drive.
 - No backend: use Google APIs directly from client; optional future edge functions for value-add.
 
-### Tech stack (React + TypeScript)
+## Tech stack (React + TypeScript)
 
 - React with TypeScript for type-safe UI and domain models
 - Vite as the bundler/dev server for fast HMR and simple static output
@@ -27,7 +27,7 @@
 - Sentry (optional) for client-side error monitoring
 - Firebase Hosting (optional) for static deploys and easy HTTPS
 
-### Library versions (recommended pins)
+## Library versions (recommended pins)
 
 - react: 18.2.0
 - react-dom: 18.2.0
@@ -51,7 +51,7 @@
 - @typescript-eslint/eslint-plugin: 7.5.0
 - firebase-tools (dev, optional): 13.0.0
 
-### Project folder structure
+## Project folder structure
 
 ```
 / (repo root)
@@ -93,7 +93,7 @@
   .eslintrc.cjs
 ```
 
-### Firebase integration
+## Firebase integration
 
 - Use Firebase Authentication with the Google provider and request the Drive App Data scope so the OAuth access token can be used directly with the Drive API.
 - Sign-in flow (client-only):
@@ -107,7 +107,7 @@
 - App Check (optional): Web Recaptcha Enterprise for protecting API usage proxies or future endpoints.
 - Hosting (optional): Firebase Hosting to serve the SPA and provide HTTP/2 + HTTPS by default.
 
-### Components
+## Components
 
 - App Shell: routing, layout, error boundaries.
 - Data Layer: repository that abstracts IndexedDB cache + Drive API adapter.
@@ -117,27 +117,27 @@
 - UI Components: list/detail editors, search, filters.
 - PWA Layer: service worker, cache strategies, background sync, notifications.
 
-### Data Model (example)
+## Data Model (example)
 
 - Document: { id, title, content, tags[], updatedAt, version }
 - Stored as JSON files per doc under Drive appDataFolder; index file for lookups.
 - File naming: `${id}.json`; index: `index.json` mapping ids to metadata.
 
-### Storage Strategy
+## Storage Strategy
 
 - Primary: IndexedDB for fast local reads/writes.
 - Source of truth: Google Drive revisions.
 - On launch: hydrate from IndexedDB; then reconcile with Drive (delta via changes.list).
 - Conflict resolution: last-writer-wins with revisionId guard; surface conflicts in UI.
 
-### Authentication & Authorization
+## Authentication & Authorization
 
 - Identity: Firebase Authentication (Google provider).
 - Scopes: `https://www.googleapis.com/auth/drive.appdata` (and optionally `drive.file`).
 - Access token: retrieved via `GoogleAuthProvider.credentialFromResult(result)?.accessToken` after sign-in.
 - Token storage: memory; refresh by re-auth or silent refresh via Firebase session when possible.
 
-### Sync Flow
+## Sync Flow
 
 1. User edits -> write to IndexedDB immediately.
 2. Queue mutation with local op id.
@@ -146,7 +146,7 @@
 5. Periodically poll Drive changes API for remote edits; merge/apply.
 6. Background sync via service worker when online.
 
-### PWA Plan
+## PWA Plan
 
 - Manifest: name, icons, display standalone, theme/background colors.
 - Service Worker: Workbox; strategies
@@ -156,19 +156,19 @@
   - IndexedDB persisted for app data
 - Offline UX: skeleton screens, queued actions, conflict banners.
 
-### Security & Privacy
+## Security & Privacy
 
 - Least-privilege scopes; store only user’s documents in appDataFolder.
 - No central server; no cross-user data access.
 - Use Content Security Policy and OAuth best practices.
 - Use Firebase project-level security rules only if/when adding Firebase storage/DB later.
 
-### Observability (client-side)
+## Observability (client-side)
 
 - Lightweight analytics (privacy-first), error reporting (Sentry) with PII scrubbing.
 - In-app diagnostics view for sync status and last errors.
 
-### CI/CD
+## CI/CD
 
 - Pipeline: GitHub Actions runs on pull requests and `main` pushes/tags.
 - Stages: install + cache → lint → type-check → test → build → (optional) PWA/Lighthouse audit → deploy.
@@ -229,13 +229,13 @@ Governance & quality gates
 - Release management: tag `vX.Y.Z` to cut a release; CI can create a GitHub Release and upload build artifacts.
 - Rollback: keep previous deploys; use Firebase Hosting release history or Cloudflare Pages deployments to revert.
 
-### Risks & Mitigations
+## Risks & Mitigations
 
 - Drive API quotas: cache aggressively; exponential backoff.
 - Token expiry: re-auth via Firebase Auth; handle missing/expired Drive token by prompting sign-in.
 - Conflicts: expose resolution UI for edge cases.
 
-### Future Extensions
+## Future Extensions
 
 - Optional backend or Cloud Functions for full-text search or share links (kept minimal).
 - Collaboration via Drive file comments or future realtime provider.
