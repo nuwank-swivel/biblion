@@ -13,6 +13,7 @@
 - Storage: Google Drive App Data Folder + optional user-selected folder; files as JSON.
 - Sync: Client maintains local cache (IndexedDB) and syncs with Google Drive.
 - No backend: use Google APIs directly from client; optional future edge functions for value-add.
+- User config: persist the selected Google Drive `folderId` in Firestore under `users/{uid}` for cross-device access.
 
 ## Tech stack (React + TypeScript)
 
@@ -106,6 +107,20 @@
   - Use that access token in `Authorization: Bearer <token>` when calling Drive API.
 - App Check (optional): Web Recaptcha Enterprise for protecting API usage proxies or future endpoints.
 - Hosting (optional): Firebase Hosting to serve the SPA and provide HTTP/2 + HTTPS by default.
+- Firestore (scoped, minimal): used to store per-user configuration only (e.g., selected Drive `folderId`, display name, breadcrumb, updatedAt). Notes content remains in Drive.
+
+User config document shape (Firestore):
+
+```
+users/{uid} => {
+  selectedFolder: {
+    id: string,           // Drive folderId (canonical)
+    name?: string,        // display-only
+    breadcrumb?: string[],
+    updatedAt: Timestamp,
+  }
+}
+```
 
 ## Components
 
@@ -116,6 +131,7 @@
 - Models: typed schemas (Zod/TypeScript) for documents/collections.
 - UI Components: list/detail editors, search, filters.
 - PWA Layer: service worker, cache strategies, background sync, notifications.
+- User Config: Firestore adapter to read/write `users/{uid}.selectedFolder`; local cache for fast boot and reconciliation.
 
 ## Data Model (example)
 

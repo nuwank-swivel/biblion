@@ -5,12 +5,15 @@
 FR1: The system shall provide Google SSO authentication allowing users to sign in with their Google account
 
 FR2: The system shall enable users to browse and select Google Drive folders for note storage
+FR2.1: The system shall persist the selected Google Drive folderId in Firestore under `users/{uid}.selectedFolder`
+FR2.2: The system shall cache the selected folder locally for fast startup and reconcile with Firestore on launch
 
 FR3: The system shall provide real-time bidirectional sync between the application and selected Google Drive folders
 
 FR4: The system shall implement conflict resolution for simultaneous edits between the application and Google Drive
 
 FR5: The system shall display background sync status indicators to inform users of sync progress
+FR5.1: The system shall show the currently selected folder name/breadcrumb sourced from Firestore (display-only)
 
 FR6: The system shall allow users to create and organize notebooks with hierarchical structure
 
@@ -55,6 +58,7 @@ NFR2: The system shall respond to user interactions within 200ms for optimal use
 NFR3: The system shall support offline functionality with seamless sync on reconnection
 
 NFR4: The system shall implement secure OAuth 2.0 authentication with Google via Firebase Authentication
+NFR4.1: The system shall restrict Firestore access using security rules to allow users to read/write only their own `users/{uid}` document
 
 NFR5: The system shall handle concurrent user sessions without data corruption
 
