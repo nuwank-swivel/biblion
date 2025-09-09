@@ -13,8 +13,11 @@
     "noFallthroughCasesInSwitch": true,
     "strict": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "outDir": "dist",
+    "rootDir": "src"
   },
   "include": ["src"],
+  "exclude": ["dist", "node_modules"],
   "references": []
 }
