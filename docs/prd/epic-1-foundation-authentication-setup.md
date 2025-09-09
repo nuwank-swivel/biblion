@@ -1,4 +1,5 @@
-# Epic 1 Foundation & Authentication Setup
+# Epic 1 - foundation-authentication-setup.md
+
 
 ## Epic Goal
 
