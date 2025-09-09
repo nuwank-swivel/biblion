@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import { Component } from 'react';
+import { Component } from "react";
 export class ErrorBoundary extends Component {
     constructor() {
         super(...arguments);
