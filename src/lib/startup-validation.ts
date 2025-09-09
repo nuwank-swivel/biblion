@@ -28,9 +28,12 @@ async function validateStartup(): Promise<StartupValidationResult> {
   // Env validation
   const missing = validateEnvVars();
   if (missing.length > 0) {
-    errors.push(
-      `Missing required Firebase environment variables: ${missing.join(", ")}. Please set them in your .env.`
-    );
+    const message = `Missing required Firebase environment variables: ${missing.join(", ")}. Please set them in your .env.`;
+    if (import.meta.env.DEV) {
+      warnings.push(message);
+    } else {
+      errors.push(message);
+    }
   }
 
   // Example warning (can be extended later)
