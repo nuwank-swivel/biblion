@@ -34,6 +34,7 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedNotebookId, setSelectedNotebookId] = React.useState<string>("1");
+  const [selectedNoteId, setSelectedNoteId] = React.useState<string>("1");
 
   // Set up keyboard shortcuts
   useKeyboardShortcuts(commonShortcuts);
@@ -184,7 +185,11 @@ export function AppShell() {
             height: "100%",
           }}
         >
-          <NotesList selectedNotebookId={selectedNotebookId} />
+          <NotesList 
+            selectedNotebookId={selectedNotebookId} 
+            selectedNoteId={selectedNoteId}
+            onNoteSelect={setSelectedNoteId}
+          />
         </Box>
 
         {/* Note Editor Column */}
@@ -194,7 +199,7 @@ export function AppShell() {
             height: "100%",
           }}
         >
-          <NoteEditor />
+          <NoteEditor selectedNoteId={selectedNoteId} />
         </Box>
       </Box>
 
@@ -218,7 +223,11 @@ export function AppShell() {
                 height: "100%",
               }}
             >
-              <NotesList selectedNotebookId={selectedNotebookId} />
+              <NotesList 
+                selectedNotebookId={selectedNotebookId} 
+                selectedNoteId={selectedNoteId}
+                onNoteSelect={setSelectedNoteId}
+              />
             </Box>
 
             {/* Note Editor Column */}
@@ -228,7 +237,7 @@ export function AppShell() {
                 height: "100%",
               }}
             >
-              <NoteEditor />
+              <NoteEditor selectedNoteId={selectedNoteId} />
             </Box>
           </Box>
         )}

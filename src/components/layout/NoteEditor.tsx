@@ -24,11 +24,12 @@ import {
   MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
 
-// Sample note data - will be replaced with real data later
-const sampleNote = {
-  id: "1",
-  title: "Meeting Notes - Q1 Planning",
-  content: `# Meeting Notes - Q1 Planning
+// Sample notes data - will be replaced with real data later
+const sampleNotes = [
+  {
+    id: "1",
+    title: "Meeting Notes - Q1 Planning",
+    content: `# Meeting Notes - Q1 Planning
 
 ## Attendees
 - John Smith (Product Manager)
@@ -60,13 +61,198 @@ const sampleNote = {
 ---
 *Created: 2 hours ago*
 *Last modified: 2 hours ago*`,
-  lastModified: "2 hours ago",
-  tags: ["work", "meeting"],
-};
+    lastModified: "2 hours ago",
+    tags: ["work", "meeting"],
+  },
+  {
+    id: "2",
+    title: "Project Ideas",
+    content: `# Project Ideas
 
-export function NoteEditor() {
-  const [noteTitle, setNoteTitle] = React.useState(sampleNote.title);
-  const [noteContent, setNoteContent] = React.useState(sampleNote.content);
+## Mobile App Concepts
+1. **Task Management App**
+   - Simple, clean interface
+   - Team collaboration features
+   - Time tracking integration
+
+2. **Learning Platform**
+   - Interactive courses
+   - Progress tracking
+   - Community features
+
+3. **Health & Fitness Tracker**
+   - Workout logging
+   - Nutrition tracking
+   - Social challenges
+
+## Web Applications
+- E-commerce platform with AI recommendations
+- Real-time collaboration tool
+- Data visualization dashboard
+
+*Last updated: 1 day ago*`,
+    lastModified: "1 day ago",
+    tags: ["ideas"],
+  },
+  {
+    id: "3",
+    title: "Learning Resources",
+    content: `# Learning Resources
+
+## React & TypeScript
+- [React Documentation](https://react.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/)
+
+## Design & UX
+- [Material Design Guidelines](https://material.io/design)
+- [Figma Community](https://www.figma.com/community)
+- [UX Design Principles](https://www.nngroup.com/articles/)
+
+## Tools & Libraries
+- Vite for fast development
+- Material-UI for components
+- Zustand for state management
+- Firebase for backend services
+
+*Last updated: 2 days ago*`,
+    lastModified: "2 days ago",
+    tags: ["learning", "resources"],
+  },
+  {
+    id: "4",
+    title: "Daily Standup",
+    content: `# Daily Standup - January 27, 2025
+
+## Team Updates
+
+### Yesterday
+- Completed user authentication setup
+- Fixed login page responsive issues
+- Started working on note editor component
+
+### Today
+- Implement three-column layout
+- Add note filtering by notebook
+- Test mobile navigation
+
+### Blockers
+- None currently
+
+## Notes
+- Need to review design specs with team
+- Planning to demo new features tomorrow
+
+*Last updated: 3 days ago*`,
+    lastModified: "3 days ago",
+    tags: ["work", "standup"],
+  },
+  {
+    id: "5",
+    title: "Book Notes - Clean Code",
+    content: `# Clean Code - Robert Martin
+
+## Key Principles
+
+### Meaningful Names
+- Use intention-revealing names
+- Avoid disinformation
+- Make meaningful distinctions
+- Use pronounceable names
+- Use searchable names
+
+### Functions
+- Small functions are better
+- Do one thing only
+- Use descriptive names
+- Minimize arguments
+- Have no side effects
+
+### Comments
+- Don't comment bad code - rewrite it
+- Explain why, not what
+- Good comments: warnings, TODO, amplification
+
+## Quotes
+> "Clean code always looks like it was written by someone who cares."
+
+*Last updated: 1 week ago*`,
+    lastModified: "1 week ago",
+    tags: ["books", "programming"],
+  },
+  {
+    id: "6",
+    title: "Sprint Planning",
+    content: `# Sprint Planning - Sprint 3
+
+## Sprint Goals
+- Complete user interface implementation
+- Implement note management features
+- Add search and filtering capabilities
+
+## User Stories
+1. **As a user**, I want to create and organize notebooks
+2. **As a user**, I want to add and edit notes within notebooks
+3. **As a user**, I want to search through my notes
+4. **As a user**, I want to use keyboard shortcuts for efficiency
+
+## Technical Tasks
+- [ ] Implement notebook CRUD operations
+- [ ] Add note editor with rich text formatting
+- [ ] Create search functionality
+- [ ] Add keyboard shortcuts
+- [ ] Write unit tests
+
+*Last updated: 4 days ago*`,
+    lastModified: "4 days ago",
+    tags: ["work", "planning"],
+  },
+  {
+    id: "7",
+    title: "Random Thoughts",
+    content: `# Random Thoughts
+
+## Ideas for the Weekend
+- Try that new coffee shop downtown
+- Read more about machine learning
+- Practice guitar - learn that new song
+- Organize my desk and workspace
+
+## Observations
+- The weather has been really nice lately
+- I'm enjoying working on this project
+- Need to remember to take more breaks
+- Should call my parents this weekend
+
+## Random Notes
+- Remember to buy groceries
+- Check if the library has that book I wanted
+- Plan a trip for next month
+- Update my resume
+
+*Last updated: 5 days ago*`,
+    lastModified: "5 days ago",
+    tags: ["personal"],
+  },
+];
+
+interface NoteEditorProps {
+  selectedNoteId?: string;
+}
+
+export function NoteEditor({ selectedNoteId = "1" }: NoteEditorProps) {
+  // Find the note with the selected ID
+  const currentNote = sampleNotes.find(note => note.id === selectedNoteId) || sampleNotes[0];
+  
+  const [noteTitle, setNoteTitle] = React.useState(currentNote.title);
+  const [noteContent, setNoteContent] = React.useState(currentNote.content);
+
+  // Update note content when selectedNoteId changes
+  React.useEffect(() => {
+    const newNote = sampleNotes.find(note => note.id === selectedNoteId) || sampleNotes[0];
+    setNoteTitle(newNote.title);
+    setNoteContent(newNote.content);
+  }, [selectedNoteId]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNoteTitle(event.target.value);
@@ -115,10 +301,10 @@ export function NoteEditor() {
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            Last modified: {sampleNote.lastModified}
+            Last modified: {currentNote.lastModified}
           </Typography>
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            {sampleNote.tags.map((tag) => (
+            {currentNote.tags.map((tag) => (
               <Typography
                 key={tag}
                 variant="caption"

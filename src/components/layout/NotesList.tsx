@@ -91,17 +91,24 @@ const sampleNotes = [
 
 interface NotesListProps {
   selectedNotebookId?: string;
+  selectedNoteId?: string;
+  onNoteSelect?: (noteId: string) => void;
 }
 
-export function NotesList({ selectedNotebookId = "1" }: NotesListProps) {
-  const [selectedNote, setSelectedNote] = React.useState("1");
+export function NotesList({ 
+  selectedNotebookId = "1", 
+  selectedNoteId = "1",
+  onNoteSelect 
+}: NotesListProps) {
   const [viewMode, setViewMode] = React.useState<"list" | "grid">("list");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [notes, setNotes] = React.useState(sampleNotes);
   const [addModalOpen, setAddModalOpen] = React.useState(false);
 
   const handleNoteClick = (noteId: string) => {
-    setSelectedNote(noteId);
+    if (onNoteSelect) {
+      onNoteSelect(noteId);
+    }
   };
 
   const handleAddNote = () => {
@@ -231,7 +238,7 @@ export function NotesList({ selectedNotebookId = "1" }: NotesListProps) {
               <ListItem disablePadding>
                 <ListItemButton
                   onClick={() => handleNoteClick(note.id)}
-                  selected={selectedNote === note.id}
+                  selected={selectedNoteId === note.id}
                   sx={{
                     px: 2,
                     py: 1.5,
@@ -257,8 +264,8 @@ export function NotesList({ selectedNotebookId = "1" }: NotesListProps) {
                       <Typography
                         variant="body2"
                         sx={{
-                          fontWeight: selectedNote === note.id ? 600 : 400,
-                          color: selectedNote === note.id ? "primary.main" : "text.primary",
+                          fontWeight: selectedNoteId === note.id ? 600 : 400,
+                          color: selectedNoteId === note.id ? "primary.main" : "text.primary",
                           mb: 0.5,
                         }}
                       >
