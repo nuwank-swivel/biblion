@@ -1,0 +1,205 @@
+import React from "react";
+import {
+  Box,
+  Drawer,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  Logout,
+} from "@mui/icons-material";
+import { NotebooksSidebar } from "./NotebooksSidebar";
+import { NotesList } from "./NotesList";
+import { NoteEditor } from "./NoteEditor";
+import { useAuthStore } from "../../features/auth/store";
+import { signOut } from "firebase/auth";
+import { auth } from "../../features/auth/firebase";
+import { useKeyboardShortcuts, commonShortcuts } from "../../hooks/useKeyboardShortcuts";
+
+const DRAWER_WIDTH = 280;
+const NOTES_WIDTH = 320;
+
+export function AppShell() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { user, reset } = useAuthStore();
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  // Set up keyboard shortcuts
+  useKeyboardShortcuts(commonShortcuts);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const onLogout = async () => {
+    try {
+      await signOut(auth);
+    } finally {
+      reset();
+      window.location.href = "/login";
+    }
+    handleProfileMenuClose();
+  };
+
+  const drawer = (
+    <NotebooksSidebar onClose={isMobile ? handleDrawerToggle : undefined} />
+  );
+
+  return (
+    <Box sx={{ display: "flex", height: "100vh" }}>
+      {/* App Bar */}
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          ml: { md: `${DRAWER_WIDTH}px` },
+          backgroundColor: "background.paper",
+          color: "text.primary",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Toolbar>
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Biblion
+          </Typography>
+          {user && (
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls="profile-menu"
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <Avatar
+                src={user.photoURL ?? undefined}
+                alt={user.displayName ?? undefined}
+                sx={{ width: 32, height: 32 }}
+              />
+            </IconButton>
+          )}
+          <Menu
+            id="profile-menu"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleProfileMenuClose}
+          >
+            <MenuItem onClick={onLogout}>
+              <Logout sx={{ mr: 1 }} />
+              Logout
+            </MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: DRAWER_WIDTH,
+          },
+        }}
+      >
+        {drawer}
+      </Drawer>
+
+      {/* Desktop Drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: "none", md: "block" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: DRAWER_WIDTH,
+          },
+        }}
+        open
+      >
+        {drawer}
+      </Drawer>
+
+      {/* Main Content */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
+        <Toolbar /> {/* Spacer for AppBar */}
+        
+        {/* Notes List Column */}
+        <Box
+          sx={{
+            width: { xs: "100%", md: NOTES_WIDTH },
+            minWidth: NOTES_WIDTH,
+            borderRight: 1,
+            borderColor: "divider",
+            display: { xs: mobileOpen ? "none" : "block", md: "block" },
+          }}
+        >
+          <NotesList />
+        </Box>
+
+        {/* Note Editor Column */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: { xs: mobileOpen ? "none" : "block", md: "block" },
+          }}
+        >
+          <NoteEditor />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
