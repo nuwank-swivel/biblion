@@ -1,5 +1,4 @@
 import { Box, Button, Container, Typography, Alert } from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth, googleProvider } from "./firebase";
 import { useAuthStore } from "./store";
@@ -42,10 +41,19 @@ export default function LoginPage() {
   return (
     <Container maxWidth="sm" sx={{ mt: 12 }}>
       <Box textAlign="center">
-        <Typography variant="h4" fontWeight={700} gutterBottom>
+        <Typography 
+          variant="h4" 
+          fontWeight={700} 
+          gutterBottom
+          sx={{ color: "#424242" }} // Dark grey instead of black
+        >
           Biblion
         </Typography>
-        <Typography color="text.secondary" gutterBottom>
+        <Typography 
+          color="text.secondary" 
+          gutterBottom
+          sx={{ color: "#757575" }} // Lighter grey
+        >
           Your AI-powered smart note-taking app
         </Typography>
         {error ? (
@@ -56,18 +64,37 @@ export default function LoginPage() {
         <Button
           variant="contained"
           onClick={onGoogleSignIn}
-          startIcon={<GoogleIcon />}
           disabled={isLoading}
           sx={{
             mt: 2,
-            backgroundColor: "#FFEB3B",
-            color: "#000",
+            backgroundColor: "#FFEB3B", // Bright yellow background
+            color: "#424242", // Dark grey text instead of black
             borderRadius: 2,
             px: 3,
             py: 1.25,
             ":hover": { backgroundColor: "#FDD835" },
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
           }}
         >
+          {/* Custom Google 'G' icon - white on dark grey background */}
+          <Box
+            sx={{
+              width: 20,
+              height: 20,
+              backgroundColor: "#424242",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontSize: "12px",
+              fontWeight: "bold",
+            }}
+          >
+            G
+          </Box>
           {isLoading ? "Signing in..." : "Sign in with Google"}
         </Button>
       </Box>
