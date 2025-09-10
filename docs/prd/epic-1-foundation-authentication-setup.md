@@ -46,18 +46,21 @@ Acceptance Criteria:
 ### Story 1.3: Basic App Shell and Navigation
 
 As a user,
-I want to see a clean, functional app interface after logging in,
-so that I can navigate and understand the application structure.
+I want to see a clean, functional three-column note-taking interface after logging in,
+so that I can navigate between notebooks, browse notes, and access creation functionality.
 
 Acceptance Criteria:
 
-1. Create main app shell with header, sidebar, and content area
-2. Implement responsive navigation sidebar
+1. Create three-column layout: Notebooks sidebar (left), Notes list (middle), Note editor (right)
+2. Implement responsive navigation with collapsible sidebars for mobile
 3. Add user profile section in header with logout option
 4. Create placeholder pages for notebooks, settings, and help
 5. Implement basic routing between main sections
 6. Add loading states and error boundaries
 7. Create consistent layout components (buttons, inputs, modals)
-8. Implement basic theming and styling system
+8. Implement Material UI theming system with light theme
 9. Add keyboard shortcuts for navigation
-10. Ensure mobile-responsive design
+10. Ensure mobile-responsive design with drawer navigation
+11. **NEW:** Implement "Add Notebook" and "Add Notes" buttons with yellow styling matching Figma design
+12. **NEW:** Create modal dialog infrastructure for notebook and note creation
+13. **NEW:** Add modal overlay and positioning system for consistent UX

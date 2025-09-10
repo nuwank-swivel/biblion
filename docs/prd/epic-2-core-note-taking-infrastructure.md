@@ -22,6 +22,10 @@ Acceptance Criteria:
 8. Implement quick page navigation with search
 9. Add notebook and page metadata (creation date, last modified)
 10. Store notebook and page structure in Firestore
+11. **NEW:** Implement "New Notebook" modal dialog matching Figma design
+12. **NEW:** Add notebook creation form with name and description fields
+13. **NEW:** Implement form validation and submission handling
+14. **NEW:** Add success feedback and navigation after notebook creation
 
 ### Story 2.2: Rich Text Editor Implementation
 
@@ -41,6 +45,10 @@ Acceptance Criteria:
 8. Create formatting toolbar with intuitive icons
 9. Implement undo/redo functionality
 10. Ensure consistent formatting across different devices
+11. **NEW:** Implement "Create New Note" modal dialog matching Figma design
+12. **NEW:** Add note creation form with notebook selection dropdown
+13. **NEW:** Implement note creation with proper notebook association
+14. **NEW:** Add form validation and submission handling for note creation
 
 ### Story 2.3: Real-time Auto-save and Version Control
 
