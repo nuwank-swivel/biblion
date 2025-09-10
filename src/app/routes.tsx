@@ -4,6 +4,8 @@ import { useAuthStore } from "../features/auth/store";
 
 const LoginPage = lazy(() => import("../features/auth/LoginPage"));
 const HomePage = lazy(() => import("../pages/HomePage"));
+const SettingsPage = lazy(() => import("../pages/SettingsPage"));
+const HelpPage = lazy(() => import("../pages/HelpPage"));
 
 export function AppRoutes() {
   const { isAuthenticated, isInitializing } = useAuthStore();
@@ -21,6 +23,22 @@ export function AppRoutes() {
         element={
           <PrivateRoute>
             <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute>
+            <SettingsPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/help"
+        element={
+          <PrivateRoute>
+            <HelpPage />
           </PrivateRoute>
         }
       />
