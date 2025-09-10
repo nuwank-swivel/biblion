@@ -4,9 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import App from "./App";
 import { theme } from "./theme";
-import { startupValidator } from "../lib/startup-validation";
+// import { startupValidator } from "../lib/startup-validation";
 import { logger } from "../lib/logger";
 import "./index.css";
+import { startupValidator } from "../lib/startup-validation";
 
 // Perform startup validation before rendering the app
 async function initializeApp() {

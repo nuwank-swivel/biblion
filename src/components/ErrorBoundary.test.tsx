@@ -32,7 +32,7 @@ describe("ErrorBoundary", () => {
     ).toBeInTheDocument();
   });
 
-  it("resets error state when Try Again is clicked", () => {
+  it("resets error state when Try Again is clicked", async () => {
     function ErrorThenOk({ trigger }: { trigger: boolean }) {
       if (trigger) throw new Error("Oops");
       return <div>All good</div>;
@@ -40,16 +40,20 @@ describe("ErrorBoundary", () => {
     function Wrapper() {
       const [trigger, setTrigger] = React.useState(true);
       return (
-        <ErrorBoundary>
-          {trigger ? <ErrorThenOk trigger={trigger} /> : <div>All good</div>}
+        <div>
+          <ErrorBoundary>
+            {trigger ? <ErrorThenOk trigger={trigger} /> : <div>All good</div>}
+          </ErrorBoundary>
           <button onClick={() => setTrigger(false)}>Reset</button>
-        </ErrorBoundary>
+        </div>
       );
     }
     render(<Wrapper />);
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+    // Toggle wrapper state first so children stop throwing
+    fireEvent.click(await screen.findByText("Reset"));
+    // Then reset boundary fallback
     fireEvent.click(screen.getByRole("button", { name: /try again/i }));
-    fireEvent.click(screen.getByText("Reset"));
-    expect(screen.getByText("All good")).toBeInTheDocument();
+    expect(await screen.findByText("All good")).toBeInTheDocument();
   });
 });
