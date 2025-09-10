@@ -84,7 +84,9 @@ export default function LoginPage() {
               ":hover": { backgroundColor: "#FDD835" },
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: 1,
+              mx: "auto", // Center the button horizontally
             }}
           >
             {/* Custom Google 'G' icon - white on dark grey background */}
