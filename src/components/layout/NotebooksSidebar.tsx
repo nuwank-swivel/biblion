@@ -19,6 +19,8 @@ import { AddNotebookModal } from "../ui/AddNotebookModal";
 
 interface NotebooksSidebarProps {
   onClose?: () => void;
+  selectedNotebookId?: string;
+  onNotebookSelect?: (notebookId: string) => void;
 }
 
 // Sample notebook data - will be replaced with real data later
@@ -53,13 +55,18 @@ const sampleNotebooks = [
   },
 ];
 
-export function NotebooksSidebar({ onClose }: NotebooksSidebarProps) {
-  const [selectedNotebook, setSelectedNotebook] = React.useState("1");
+export function NotebooksSidebar({ 
+  onClose, 
+  selectedNotebookId = "1", 
+  onNotebookSelect 
+}: NotebooksSidebarProps) {
   const [notebooks, setNotebooks] = React.useState(sampleNotebooks);
   const [addModalOpen, setAddModalOpen] = React.useState(false);
 
   const handleNotebookClick = (notebookId: string) => {
-    setSelectedNotebook(notebookId);
+    if (onNotebookSelect) {
+      onNotebookSelect(notebookId);
+    }
     if (onClose) {
       onClose();
     }
@@ -119,7 +126,7 @@ export function NotebooksSidebar({ onClose }: NotebooksSidebarProps) {
             <ListItem key={notebook.id} disablePadding>
               <ListItemButton
                 onClick={() => handleNotebookClick(notebook.id)}
-                selected={selectedNotebook === notebook.id}
+                selected={selectedNotebookId === notebook.id}
                 sx={{
                   px: 2,
                   py: 1.5,
@@ -141,7 +148,7 @@ export function NotebooksSidebar({ onClose }: NotebooksSidebarProps) {
                 }}
               >
                 <ListItemIcon sx={{ minWidth: 40 }}>
-                  {selectedNotebook === notebook.id ? (
+                  {selectedNotebookId === notebook.id ? (
                     <FolderOpenIcon color="primary" />
                   ) : (
                     <FolderIcon color="action" />
@@ -152,8 +159,8 @@ export function NotebooksSidebar({ onClose }: NotebooksSidebarProps) {
                     <Typography
                       variant="body2"
                       sx={{
-                        fontWeight: selectedNotebook === notebook.id ? 600 : 400,
-                        color: selectedNotebook === notebook.id ? "primary.main" : "text.primary",
+                        fontWeight: selectedNotebookId === notebook.id ? 600 : 400,
+                        color: selectedNotebookId === notebook.id ? "primary.main" : "text.primary",
                       }}
                     >
                       {notebook.title}

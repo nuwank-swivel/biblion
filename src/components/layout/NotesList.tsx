@@ -30,6 +30,7 @@ const sampleNotes = [
     content: "Discussed quarterly goals and priorities for the team...",
     lastModified: "2 hours ago",
     tags: ["work", "meeting"],
+    notebookId: "1", // Personal Notes
     isActive: true,
   },
   {
@@ -38,6 +39,7 @@ const sampleNotes = [
     content: "Some interesting project ideas to explore...",
     lastModified: "1 day ago",
     tags: ["ideas"],
+    notebookId: "4", // Ideas
     isActive: false,
   },
   {
@@ -46,6 +48,7 @@ const sampleNotes = [
     content: "List of useful resources for learning React and TypeScript...",
     lastModified: "2 days ago",
     tags: ["learning", "resources"],
+    notebookId: "3", // Learning
     isActive: false,
   },
   {
@@ -54,6 +57,7 @@ const sampleNotes = [
     content: "Notes from today's standup meeting...",
     lastModified: "3 days ago",
     tags: ["work", "standup"],
+    notebookId: "2", // Work Projects
     isActive: false,
   },
   {
@@ -62,11 +66,34 @@ const sampleNotes = [
     content: "Key takeaways from reading Clean Code by Robert Martin...",
     lastModified: "1 week ago",
     tags: ["books", "programming"],
+    notebookId: "3", // Learning
+    isActive: false,
+  },
+  {
+    id: "6",
+    title: "Sprint Planning",
+    content: "Planning for the next sprint...",
+    lastModified: "4 days ago",
+    tags: ["work", "planning"],
+    notebookId: "2", // Work Projects
+    isActive: false,
+  },
+  {
+    id: "7",
+    title: "Random Thoughts",
+    content: "Just some random thoughts and observations...",
+    lastModified: "5 days ago",
+    tags: ["personal"],
+    notebookId: "1", // Personal Notes
     isActive: false,
   },
 ];
 
-export function NotesList() {
+interface NotesListProps {
+  selectedNotebookId?: string;
+}
+
+export function NotesList({ selectedNotebookId = "1" }: NotesListProps) {
   const [selectedNote, setSelectedNote] = React.useState("1");
   const [viewMode, setViewMode] = React.useState<"list" | "grid">("list");
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -88,6 +115,7 @@ export function NotesList() {
       content,
       lastModified: "Just now",
       tags,
+      notebookId: selectedNotebookId,
       isActive: false,
     };
     setNotes([newNote, ...notes]);
@@ -102,11 +130,18 @@ export function NotesList() {
     }
   };
 
-  const filteredNotes = notes.filter((note) =>
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredNotes = notes.filter((note) => {
+    // First filter by selected notebook
+    const matchesNotebook = note.notebookId === selectedNotebookId;
+    
+    // Then filter by search query if provided
+    const matchesSearch = searchQuery === "" || 
+      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    return matchesNotebook && matchesSearch;
+  });
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -290,6 +325,7 @@ export function NotesList() {
           { id: "3", title: "Learning" },
           { id: "4", title: "Ideas" },
         ]}
+        selectedNotebookId={selectedNotebookId}
       />
     </Box>
   );
