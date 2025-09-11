@@ -13,6 +13,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Menu as MenuIcon, Logout } from "@mui/icons-material";
+import { NavigationSidebar } from "./NavigationSidebar";
 import { NotebooksSidebar } from "./NotebooksSidebar";
 import { NotesList } from "./NotesList";
 import { NoteEditor } from "./NoteEditor";
@@ -33,7 +34,10 @@ export function AppShell() {
   const { user, reset } = useAuthStore();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [selectedNotebookId, setSelectedNotebookId] = React.useState<string>("1");
+  const [selectedSection, setSelectedSection] =
+    React.useState<string>("documents");
+  const [selectedNotebookId, setSelectedNotebookId] =
+    React.useState<string>("1");
   const [selectedNoteId, setSelectedNoteId] = React.useState<string>("1");
 
   // Set up keyboard shortcuts
@@ -152,7 +156,7 @@ export function AppShell() {
         {drawer}
       </Drawer>
 
-      {/* Desktop Layout - Three Columns */}
+      {/* Desktop Layout - Four Columns (Navigation + Three Columns) */}
       <Box
         sx={{
           display: { xs: "none", md: "flex" },
@@ -161,6 +165,12 @@ export function AppShell() {
           pt: "64px", // Account for AppBar height
         }}
       >
+        {/* Navigation Sidebar */}
+        <NavigationSidebar
+          selectedSection={selectedSection}
+          onSectionSelect={setSelectedSection}
+        />
+
         {/* Notebooks Column */}
         <Box
           sx={{
@@ -170,7 +180,7 @@ export function AppShell() {
             height: "100%",
           }}
         >
-          <NotebooksSidebar 
+          <NotebooksSidebar
             selectedNotebookId={selectedNotebookId}
             onNotebookSelect={setSelectedNotebookId}
           />
@@ -185,8 +195,8 @@ export function AppShell() {
             height: "100%",
           }}
         >
-          <NotesList 
-            selectedNotebookId={selectedNotebookId} 
+          <NotesList
+            selectedNotebookId={selectedNotebookId}
             selectedNoteId={selectedNoteId}
             onNoteSelect={setSelectedNoteId}
           />
@@ -223,8 +233,8 @@ export function AppShell() {
                 height: "100%",
               }}
             >
-              <NotesList 
-                selectedNotebookId={selectedNotebookId} 
+              <NotesList
+                selectedNotebookId={selectedNotebookId}
                 selectedNoteId={selectedNoteId}
                 onNoteSelect={setSelectedNoteId}
               />

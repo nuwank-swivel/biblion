@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-} from "@mui/material";
+import { TextField, Button, Box, Typography } from "@mui/material";
 import { Modal } from "./Modal";
 
 interface AddNotebookModalProps {
@@ -13,7 +8,11 @@ interface AddNotebookModalProps {
   onSave: (title: string, description: string) => void;
 }
 
-export function AddNotebookModal({ open, onClose, onSave }: AddNotebookModalProps) {
+export function AddNotebookModal({
+  open,
+  onClose,
+  onSave,
+}: AddNotebookModalProps) {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
 
@@ -36,7 +35,7 @@ export function AddNotebookModal({ open, onClose, onSave }: AddNotebookModalProp
     <Modal
       open={open}
       onClose={handleClose}
-      title="Add New Notebook"
+      title="New Notebook"
       actions={
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button onClick={handleClose} color="inherit">
@@ -47,9 +46,10 @@ export function AddNotebookModal({ open, onClose, onSave }: AddNotebookModalProp
             variant="contained"
             disabled={!title.trim()}
             sx={{
-              backgroundColor: "primary.main",
+              backgroundColor: "#FFD700", // Yellow accent color as per Figma design
+              color: "text.primary",
               "&:hover": {
-                backgroundColor: "primary.dark",
+                backgroundColor: "#E6C200",
               },
             }}
           >
@@ -61,27 +61,24 @@ export function AddNotebookModal({ open, onClose, onSave }: AddNotebookModalProp
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <TextField
           fullWidth
-          label="Notebook Title"
+          label="Name"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter notebook title..."
+          placeholder="e.g., Marketing Campaign Q3"
           variant="outlined"
           autoFocus
           required
         />
         <TextField
           fullWidth
-          label="Description (Optional)"
+          label="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter a description for this notebook..."
+          placeholder="e.g., A place for all assets and notes for the upcoming campaign."
           variant="outlined"
           multiline
           rows={3}
         />
-        <Typography variant="caption" color="text.secondary">
-          Notebooks help you organize your notes into different categories or projects.
-        </Typography>
       </Box>
     </Modal>
   );

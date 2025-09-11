@@ -7,6 +7,7 @@ import {
   Toolbar,
   Divider,
   Paper,
+  Chip,
 } from "@mui/material";
 import {
   FormatBold as FormatBoldIcon,
@@ -23,249 +24,158 @@ import {
   History as HistoryIcon,
   MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
-
-// Sample notes data - will be replaced with real data later
-const sampleNotes = [
-  {
-    id: "1",
-    title: "Meeting Notes - Q1 Planning",
-    content: `# Meeting Notes - Q1 Planning
-
-## Attendees
-- John Smith (Product Manager)
-- Sarah Johnson (Engineering Lead)
-- Mike Chen (Design Lead)
-
-## Key Discussion Points
-
-### 1. Q1 Goals
-- Increase user engagement by 25%
-- Launch new mobile app features
-- Improve performance metrics
-
-### 2. Technical Priorities
-- **High Priority**: Database optimization
-- **Medium Priority**: UI/UX improvements
-- **Low Priority**: New integrations
-
-### 3. Action Items
-- [ ] Complete user research by Feb 15
-- [ ] Finalize mobile app design by Feb 20
-- [ ] Set up performance monitoring by Feb 25
-
-## Next Steps
-- Schedule follow-up meeting for next week
-- Review progress on action items
-- Prepare presentation for stakeholders
-
----
-*Created: 2 hours ago*
-*Last modified: 2 hours ago*`,
-    lastModified: "2 hours ago",
-    tags: ["work", "meeting"],
-  },
-  {
-    id: "2",
-    title: "Project Ideas",
-    content: `# Project Ideas
-
-## Mobile App Concepts
-1. **Task Management App**
-   - Simple, clean interface
-   - Team collaboration features
-   - Time tracking integration
-
-2. **Learning Platform**
-   - Interactive courses
-   - Progress tracking
-   - Community features
-
-3. **Health & Fitness Tracker**
-   - Workout logging
-   - Nutrition tracking
-   - Social challenges
-
-## Web Applications
-- E-commerce platform with AI recommendations
-- Real-time collaboration tool
-- Data visualization dashboard
-
-*Last updated: 1 day ago*`,
-    lastModified: "1 day ago",
-    tags: ["ideas"],
-  },
-  {
-    id: "3",
-    title: "Learning Resources",
-    content: `# Learning Resources
-
-## React & TypeScript
-- [React Documentation](https://react.dev)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/)
-
-## Design & UX
-- [Material Design Guidelines](https://material.io/design)
-- [Figma Community](https://www.figma.com/community)
-- [UX Design Principles](https://www.nngroup.com/articles/)
-
-## Tools & Libraries
-- Vite for fast development
-- Material-UI for components
-- Zustand for state management
-- Firebase for backend services
-
-*Last updated: 2 days ago*`,
-    lastModified: "2 days ago",
-    tags: ["learning", "resources"],
-  },
-  {
-    id: "4",
-    title: "Daily Standup",
-    content: `# Daily Standup - January 27, 2025
-
-## Team Updates
-
-### Yesterday
-- Completed user authentication setup
-- Fixed login page responsive issues
-- Started working on note editor component
-
-### Today
-- Implement three-column layout
-- Add note filtering by notebook
-- Test mobile navigation
-
-### Blockers
-- None currently
-
-## Notes
-- Need to review design specs with team
-- Planning to demo new features tomorrow
-
-*Last updated: 3 days ago*`,
-    lastModified: "3 days ago",
-    tags: ["work", "standup"],
-  },
-  {
-    id: "5",
-    title: "Book Notes - Clean Code",
-    content: `# Clean Code - Robert Martin
-
-## Key Principles
-
-### Meaningful Names
-- Use intention-revealing names
-- Avoid disinformation
-- Make meaningful distinctions
-- Use pronounceable names
-- Use searchable names
-
-### Functions
-- Small functions are better
-- Do one thing only
-- Use descriptive names
-- Minimize arguments
-- Have no side effects
-
-### Comments
-- Don't comment bad code - rewrite it
-- Explain why, not what
-- Good comments: warnings, TODO, amplification
-
-## Quotes
-> "Clean code always looks like it was written by someone who cares."
-
-*Last updated: 1 week ago*`,
-    lastModified: "1 week ago",
-    tags: ["books", "programming"],
-  },
-  {
-    id: "6",
-    title: "Sprint Planning",
-    content: `# Sprint Planning - Sprint 3
-
-## Sprint Goals
-- Complete user interface implementation
-- Implement note management features
-- Add search and filtering capabilities
-
-## User Stories
-1. **As a user**, I want to create and organize notebooks
-2. **As a user**, I want to add and edit notes within notebooks
-3. **As a user**, I want to search through my notes
-4. **As a user**, I want to use keyboard shortcuts for efficiency
-
-## Technical Tasks
-- [ ] Implement notebook CRUD operations
-- [ ] Add note editor with rich text formatting
-- [ ] Create search functionality
-- [ ] Add keyboard shortcuts
-- [ ] Write unit tests
-
-*Last updated: 4 days ago*`,
-    lastModified: "4 days ago",
-    tags: ["work", "planning"],
-  },
-  {
-    id: "7",
-    title: "Random Thoughts",
-    content: `# Random Thoughts
-
-## Ideas for the Weekend
-- Try that new coffee shop downtown
-- Read more about machine learning
-- Practice guitar - learn that new song
-- Organize my desk and workspace
-
-## Observations
-- The weather has been really nice lately
-- I'm enjoying working on this project
-- Need to remember to take more breaks
-- Should call my parents this weekend
-
-## Random Notes
-- Remember to buy groceries
-- Check if the library has that book I wanted
-- Plan a trip for next month
-- Update my resume
-
-*Last updated: 5 days ago*`,
-    lastModified: "5 days ago",
-    tags: ["personal"],
-  },
-];
+import { Note } from "../../types/notebook";
+import { noteService } from "../../services/notebookService";
+import { useAuthStore } from "../../features/auth/store";
 
 interface NoteEditorProps {
   selectedNoteId?: string;
 }
 
-export function NoteEditor({ selectedNoteId = "1" }: NoteEditorProps) {
-  // Find the note with the selected ID
-  const currentNote = sampleNotes.find(note => note.id === selectedNoteId) || sampleNotes[0];
-  
-  const [noteTitle, setNoteTitle] = React.useState(currentNote.title);
-  const [noteContent, setNoteContent] = React.useState(currentNote.content);
+export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
+  const { user } = useAuthStore();
+  const [currentNote, setCurrentNote] = React.useState<Note | null>(null);
+  const [noteTitle, setNoteTitle] = React.useState("");
+  const [noteContent, setNoteContent] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // Update note content when selectedNoteId changes
+  // Load note when selectedNoteId changes
   React.useEffect(() => {
-    const newNote = sampleNotes.find(note => note.id === selectedNoteId) || sampleNotes[0];
-    setNoteTitle(newNote.title);
-    setNoteContent(newNote.content);
-  }, [selectedNoteId]);
+    if (!user || !selectedNoteId) {
+      setCurrentNote(null);
+      setNoteTitle("");
+      setNoteContent("");
+      setLoading(false);
+      return;
+    }
+
+    const loadNote = async () => {
+      try {
+        setLoading(true);
+        const note = await noteService.getNote(selectedNoteId);
+        if (note) {
+          setCurrentNote(note);
+          setNoteTitle(note.title);
+          setNoteContent(note.content);
+        } else {
+          setCurrentNote(null);
+          setNoteTitle("");
+          setNoteContent("");
+        }
+        setError(null);
+      } catch (err) {
+        setError("Failed to load note");
+        console.error("Error loading note:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNote();
+  }, [user, selectedNoteId]);
+
+  // Auto-save functionality
+  React.useEffect(() => {
+    if (!currentNote || !user) return;
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        await noteService.updateNote(currentNote.id, {
+          title: noteTitle,
+          content: noteContent,
+        });
+      } catch (err) {
+        console.error("Error auto-saving note:", err);
+      }
+    }, 1000); // Auto-save after 1 second of inactivity
+
+    return () => clearTimeout(timeoutId);
+  }, [noteTitle, noteContent, currentNote, user]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNoteTitle(event.target.value);
   };
 
-  const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setNoteContent(event.target.value);
   };
 
   const handleFormatAction = (action: string) => {
-    // TODO: Implement formatting actions
+    // TODO: Implement rich text formatting actions
     console.log(`Format action: ${action}`);
   };
+
+  const formatLastModified = (date: Date) => {
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24)
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7)
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    return `${diffInWeeks} week${diffInWeeks > 1 ? "s" : ""} ago`;
+  };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Loading note...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="body2" color="error">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!currentNote) {
+    return (
+      <Box
+        sx={{
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Select a note to view and edit
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -301,24 +211,23 @@ export function NoteEditor({ selectedNoteId = "1" }: NoteEditorProps) {
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            Last modified: {currentNote.lastModified}
+            Last modified: {formatLastModified(currentNote.updatedAt)}
           </Typography>
           <Box sx={{ display: "flex", gap: 0.5 }}>
             {currentNote.tags.map((tag) => (
-              <Typography
+              <Chip
                 key={tag}
-                variant="caption"
+                label={tag}
+                size="small"
+                variant="outlined"
                 sx={{
-                  px: 1,
-                  py: 0.25,
-                  backgroundColor: "primary.light",
-                  color: "primary.main",
-                  borderRadius: 1,
+                  height: 20,
                   fontSize: "0.75rem",
+                  "& .MuiChip-label": {
+                    px: 0.5,
+                  },
                 }}
-              >
-                {tag}
-              </Typography>
+              />
             ))}
           </Box>
         </Box>
