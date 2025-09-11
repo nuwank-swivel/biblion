@@ -28,6 +28,10 @@ import {
 import { Note } from "../../types/notebook";
 import { noteService } from "../../services/notebookService";
 import { useAuthStore } from "../../features/auth/store";
+import { autoSaveService } from "../../features/sync/auto-save";
+import { versionManager } from "../../features/sync/version-manager";
+import { SaveStatusIndicator } from "../ui/save-status";
+import { VersionHistory } from "../ui/version-history";
 
 interface NoteEditorProps {
   selectedNoteId?: string;
@@ -40,6 +44,12 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
   const [noteContent, setNoteContent] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = React.useState<any>({
+    state: "idle",
+    retryCount: 0,
+  });
+  const [showVersionHistory, setShowVersionHistory] = React.useState(false);
+  const [lastContentHash, setLastContentHash] = React.useState<string>("");
 
   // Load note when selectedNoteId changes
   React.useEffect(() => {
@@ -76,23 +86,47 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
     loadNote();
   }, [user, selectedNoteId]);
 
-  // Auto-save functionality
+  // Auto-save functionality with new service
   React.useEffect(() => {
-    if (!currentNote || !user) return;
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        await noteService.updateNote(currentNote.id, {
-          title: noteTitle,
-          content: noteContent,
-        });
-      } catch (err) {
-        console.error("Error auto-saving note:", err);
+    if (!currentNote || !user) {
+      // Stop auto-save for current note
+      if (currentNote?.id) {
+        autoSaveService.stopAutoSave(currentNote.id);
       }
-    }, 1000); // Auto-save after 1 second of inactivity
+      return;
+    }
 
-    return () => clearTimeout(timeoutId);
+    // Subscribe to save status changes
+    const unsubscribe = autoSaveService.subscribeToSaveStatus(
+      currentNote.id,
+      setSaveStatus
+    );
+
+    // Start auto-save
+    autoSaveService.startAutoSave(currentNote.id, noteContent, noteTitle);
+
+    return () => {
+      unsubscribe();
+      autoSaveService.stopAutoSave(currentNote.id);
+    };
   }, [noteTitle, noteContent, currentNote, user]);
+
+  // Create version on significant content changes
+  React.useEffect(() => {
+    if (!currentNote || !user || !noteContent) return;
+
+    const contentHash = btoa(noteContent).slice(0, 16); // Simple hash
+    if (contentHash !== lastContentHash && lastContentHash !== "") {
+      // Content has changed significantly, create a version
+      versionManager.createVersion(
+        currentNote.id,
+        noteContent,
+        user.email || "Unknown",
+        "Auto-saved version"
+      );
+    }
+    setLastContentHash(contentHash);
+  }, [noteContent, currentNote, user, lastContentHash]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNoteTitle(event.target.value);
@@ -119,6 +153,10 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
           event.preventDefault();
           handleFormatAction("underline");
           break;
+        case "s":
+          event.preventDefault();
+          handleManualSave();
+          break;
         case "z":
           event.preventDefault();
           if (event.shiftKey) {
@@ -132,6 +170,35 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
           handleFormatAction("redo");
           break;
       }
+    }
+  };
+
+  const handleManualSave = async () => {
+    if (!currentNote) return;
+
+    try {
+      await autoSaveService.manualSave(currentNote.id, noteContent, noteTitle);
+    } catch (err) {
+      console.error("Manual save failed:", err);
+    }
+  };
+
+  const handleRetrySave = async () => {
+    if (!currentNote) return;
+
+    try {
+      await autoSaveService.manualSave(currentNote.id, noteContent, noteTitle);
+    } catch (err) {
+      console.error("Retry save failed:", err);
+    }
+  };
+
+  const handleVersionRestore = (version: any) => {
+    setNoteContent(version.content);
+    // Focus the editor to trigger auto-save
+    const editor = document.getElementById("note-content-editor");
+    if (editor) {
+      editor.focus();
     }
   };
 
@@ -286,9 +353,17 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
             mt: 1,
           }}
         >
-          <Typography variant="caption" color="text.secondary">
-            Last modified: {formatLastModified(currentNote.updatedAt)}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Typography variant="caption" color="text.secondary">
+              Last modified: {formatLastModified(currentNote.updatedAt)}
+            </Typography>
+            <SaveStatusIndicator
+              status={saveStatus}
+              onRetry={handleRetrySave}
+              onManualSave={handleManualSave}
+              compact
+            />
+          </Box>
           <Box sx={{ display: "flex", gap: 0.5 }}>
             {currentNote.tags.map((tag) => (
               <Chip
@@ -543,12 +618,12 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 <ShareIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Undo (Ctrl+Z)">
+            <Tooltip title="Version History">
               <IconButton
                 size="small"
-                onClick={() => handleFormatAction("undo")}
+                onClick={() => setShowVersionHistory(true)}
                 sx={{ p: 0.5 }}
-                aria-label="Undo last action"
+                aria-label="View version history"
                 role="button"
               >
                 <HistoryIcon fontSize="small" />
@@ -568,6 +643,16 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
           </Box>
         </Toolbar>
       </Paper>
+
+      {/* Version History Dialog */}
+      {currentNote && (
+        <VersionHistory
+          open={showVersionHistory}
+          onClose={() => setShowVersionHistory(false)}
+          pageId={currentNote.id}
+          onRestore={handleVersionRestore}
+        />
+      )}
     </Box>
   );
 }
