@@ -8,6 +8,7 @@ import {
   Divider,
   Paper,
   Chip,
+  Tooltip,
 } from "@mui/material";
 import {
   FormatBold as FormatBoldIcon,
@@ -97,15 +98,90 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
     setNoteTitle(event.target.value);
   };
 
-  const handleContentChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setNoteContent(event.target.value);
+  const handleContentChange = (event: React.FormEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement;
+    setNoteContent(target.innerHTML);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    // Handle keyboard shortcuts
+    if (event.ctrlKey || event.metaKey) {
+      switch (event.key.toLowerCase()) {
+        case "b":
+          event.preventDefault();
+          handleFormatAction("bold");
+          break;
+        case "i":
+          event.preventDefault();
+          handleFormatAction("italic");
+          break;
+        case "u":
+          event.preventDefault();
+          handleFormatAction("underline");
+          break;
+        case "z":
+          event.preventDefault();
+          if (event.shiftKey) {
+            handleFormatAction("redo");
+          } else {
+            handleFormatAction("undo");
+          }
+          break;
+        case "y":
+          event.preventDefault();
+          handleFormatAction("redo");
+          break;
+      }
+    }
   };
 
   const handleFormatAction = (action: string) => {
-    // TODO: Implement rich text formatting actions
-    console.log(`Format action: ${action}`);
+    // Focus the content editor before applying formatting
+    const editor = document.getElementById("note-content-editor");
+    if (editor) {
+      editor.focus();
+    }
+
+    switch (action) {
+      case "bold":
+        document.execCommand("bold", false);
+        break;
+      case "italic":
+        document.execCommand("italic", false);
+        break;
+      case "underline":
+        document.execCommand("underline", false);
+        break;
+      case "align-left":
+        document.execCommand("justifyLeft", false);
+        break;
+      case "align-center":
+        document.execCommand("justifyCenter", false);
+        break;
+      case "align-right":
+        document.execCommand("justifyRight", false);
+        break;
+      case "bullet-list":
+        document.execCommand("insertUnorderedList", false);
+        break;
+      case "numbered-list":
+        document.execCommand("insertOrderedList", false);
+        break;
+      case "quote":
+        document.execCommand("formatBlock", false, "blockquote");
+        break;
+      case "code":
+        document.execCommand("formatBlock", false, "pre");
+        break;
+      case "undo":
+        document.execCommand("undo", false);
+        break;
+      case "redo":
+        document.execCommand("redo", false);
+        break;
+      default:
+        console.log(`Unhandled format action: ${action}`);
+    }
   };
 
   const formatLastModified = (date: Date) => {
@@ -235,32 +311,64 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
 
       {/* Note Content */}
       <Box sx={{ flexGrow: 1, p: 2 }}>
-        <TextField
-          fullWidth
-          multiline
-          value={noteContent}
-          onChange={handleContentChange}
-          placeholder="Start writing your note..."
-          variant="standard"
-          InputProps={{
-            disableUnderline: true,
-            sx: {
-              height: "100%",
-              "& .MuiInputBase-input": {
-                height: "100% !important",
-                overflow: "auto !important",
-                resize: "none",
-                fontFamily: "monospace",
-                fontSize: "0.875rem",
-                lineHeight: 1.6,
-              },
-            },
-          }}
+        <Box
+          id="note-content-editor"
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleContentChange}
+          onKeyDown={handleKeyDown}
+          dangerouslySetInnerHTML={{ __html: noteContent }}
           sx={{
             height: "100%",
-            "& .MuiInputBase-root": {
-              height: "100%",
-              alignItems: "flex-start",
+            minHeight: "200px",
+            padding: 2,
+            border: "1px solid transparent",
+            borderRadius: 1,
+            fontSize: "0.875rem",
+            lineHeight: 1.6,
+            fontFamily: "inherit",
+            outline: "none",
+            overflow: "auto",
+            "&:focus": {
+              border: "1px solid",
+              borderColor: "primary.main",
+            },
+            "&:empty:before": {
+              content: '"Start writing your note..."',
+              color: "text.disabled",
+              fontStyle: "italic",
+            },
+            // Rich text formatting styles
+            "& strong, & b": {
+              fontWeight: "bold",
+            },
+            "& em, & i": {
+              fontStyle: "italic",
+            },
+            "& u": {
+              textDecoration: "underline",
+            },
+            "& blockquote": {
+              borderLeft: "4px solid",
+              borderColor: "primary.main",
+              paddingLeft: 2,
+              marginLeft: 0,
+              fontStyle: "italic",
+              color: "text.secondary",
+            },
+            "& pre": {
+              backgroundColor: "grey.100",
+              padding: 1,
+              borderRadius: 1,
+              fontFamily: "monospace",
+              fontSize: "0.75rem",
+              overflow: "auto",
+            },
+            "& ul, & ol": {
+              paddingLeft: 2,
+            },
+            "& li": {
+              marginBottom: 0.5,
             },
           }}
         />
@@ -286,121 +394,147 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
         >
           {/* Text Formatting */}
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("bold")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatBoldIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("italic")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatItalicIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("underline")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatUnderlinedIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Bold (Ctrl+B)">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("bold")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatBoldIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Italic (Ctrl+I)">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("italic")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatItalicIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Underline (Ctrl+U)">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("underline")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatUnderlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
 
           <Divider orientation="vertical" flexItem />
 
           {/* Alignment */}
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("align-left")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatAlignLeftIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("align-center")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatAlignCenterIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("align-right")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatAlignRightIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Align Left">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("align-left")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatAlignLeftIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Align Center">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("align-center")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatAlignCenterIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Align Right">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("align-right")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatAlignRightIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
 
           <Divider orientation="vertical" flexItem />
 
           {/* Lists */}
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("bullet-list")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatListBulletedIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("numbered-list")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatListNumberedIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Bullet List">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("bullet-list")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatListBulletedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Numbered List">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("numbered-list")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatListNumberedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
 
           <Divider orientation="vertical" flexItem />
 
           {/* Special Formatting */}
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("quote")}
-              sx={{ p: 0.5 }}
-            >
-              <FormatQuoteIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("code")}
-              sx={{ p: 0.5 }}
-            >
-              <CodeIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Quote">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("quote")}
+                sx={{ p: 0.5 }}
+              >
+                <FormatQuoteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Code Block">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("code")}
+                sx={{ p: 0.5 }}
+              >
+                <CodeIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
 
           <Box sx={{ flexGrow: 1 }} />
 
           {/* Actions */}
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("share")}
-              sx={{ p: 0.5 }}
-            >
-              <ShareIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("history")}
-              sx={{ p: 0.5 }}
-            >
-              <HistoryIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleFormatAction("more")}
-              sx={{ p: 0.5 }}
-            >
-              <MoreVertIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Share">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("share")}
+                sx={{ p: 0.5 }}
+              >
+                <ShareIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Undo (Ctrl+Z)">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("undo")}
+                sx={{ p: 0.5 }}
+              >
+                <HistoryIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="More Options">
+              <IconButton
+                size="small"
+                onClick={() => handleFormatAction("more")}
+                sx={{ p: 0.5 }}
+              >
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Toolbar>
       </Paper>
