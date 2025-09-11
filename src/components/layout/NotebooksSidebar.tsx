@@ -13,7 +13,6 @@ import {
   MenuItem,
   ListItemIcon as MenuListItemIcon,
   ListItemText as MenuListItemText,
-  Chip,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -22,7 +21,6 @@ import {
   MoreVert as MoreVertIcon,
   PushPin as PushPinIcon,
   PushPinOutlined as PushPinOutlinedIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { AddNotebookModal } from "../ui/AddNotebookModal";
@@ -54,18 +52,28 @@ export function NotebooksSidebar({
 
   // Load notebooks on component mount
   React.useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      console.log("NotebooksSidebar: No user found");
+      return;
+    }
+
+    console.log("NotebooksSidebar: Loading notebooks for user:", user.uid);
+    setLoading(true);
 
     const unsubscribe = notebookService.subscribeToNotebooks(
       user.uid,
       (notebooks) => {
+        console.log("NotebooksSidebar: Received notebooks:", notebooks);
         setNotebooks(notebooks);
         setLoading(false);
         setError(null);
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      console.log("NotebooksSidebar: Unsubscribing from notebooks");
+      unsubscribe();
+    };
   }, [user]);
 
   const handleNotebookClick = (notebookId: string) => {
@@ -82,7 +90,12 @@ export function NotebooksSidebar({
   };
 
   const handleSaveNotebook = async (name: string, description: string) => {
-    if (!user) return;
+    if (!user) {
+      console.log("NotebooksSidebar: No user found when trying to save notebook");
+      return;
+    }
+
+    console.log("NotebooksSidebar: Saving notebook for user:", user.uid);
 
     try {
       setLoading(true);
@@ -91,6 +104,7 @@ export function NotebooksSidebar({
         description,
         pinned: false,
       });
+      console.log("NotebooksSidebar: Notebook saved successfully");
     } catch (err) {
       setError("Failed to create notebook");
       console.error("Error creating notebook:", err);

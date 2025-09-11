@@ -32,6 +32,8 @@ export const notebookService = {
   // Create a new notebook
   async createNotebook(userId: string, data: CreateNotebookData): Promise<string> {
     try {
+      console.log("notebookService: Creating notebook for userId:", userId, "with data:", data);
+      
       const notebookData = {
         ...data,
         userId,
@@ -41,7 +43,11 @@ export const notebookService = {
         order: 0, // Will be updated after creation
       };
 
+      console.log("notebookService: Notebook data to save:", notebookData);
+
       const docRef = await addDoc(collection(db, NOTEBOOKS_COLLECTION), notebookData);
+      
+      console.log("notebookService: Notebook created with ID:", docRef.id);
       
       // Update the order to be the same as the ID for now
       await updateDoc(docRef, { order: Date.now() });
@@ -168,6 +174,8 @@ export const notebookService = {
 
   // Subscribe to notebooks changes
   subscribeToNotebooks(userId: string, callback: (notebooks: Notebook[]) => void): () => void {
+    console.log("notebookService: Subscribing to notebooks for userId:", userId);
+    
     const q = query(
       collection(db, NOTEBOOKS_COLLECTION),
       where("userId", "==", userId),
@@ -176,6 +184,12 @@ export const notebookService = {
     );
 
     return onSnapshot(q, (querySnapshot) => {
+      console.log("notebookService: Firestore query snapshot received:", {
+        size: querySnapshot.size,
+        empty: querySnapshot.empty,
+        docs: querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }))
+      });
+      
       const notebooks = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -183,7 +197,10 @@ export const notebookService = {
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as Notebook[];
       
+      console.log("notebookService: Processed notebooks:", notebooks);
       callback(notebooks);
+    }, (error) => {
+      console.error("notebookService: Firestore query error:", error);
     });
   },
 };
