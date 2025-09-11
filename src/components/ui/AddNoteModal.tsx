@@ -16,7 +16,12 @@ import { Modal } from "./Modal";
 interface AddNoteModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (title: string, content: string, tags: string[]) => void;
+  onSave: (
+    title: string,
+    content: string,
+    tags: string[],
+    notebookId: string
+  ) => void;
   notebooks: Array<{ id: string; title: string }>;
   selectedNotebookId?: string;
 }
@@ -51,8 +56,8 @@ export function AddNoteModal({
   }, [selectedNotebookId]);
 
   const handleSave = () => {
-    if (title.trim()) {
-      onSave(title.trim(), content.trim(), tags);
+    if (title.trim() && notebookId) {
+      onSave(title.trim(), content.trim(), tags, notebookId);
       setTitle("");
       setContent("");
       setTags([]);
@@ -83,7 +88,7 @@ export function AddNoteModal({
           <Button
             onClick={handleSave}
             variant="contained"
-            disabled={!title.trim()}
+            disabled={!title.trim() || !notebookId}
             sx={{
               backgroundColor: "primary.main",
               "&:hover": {
@@ -107,7 +112,7 @@ export function AddNoteModal({
           autoFocus
           required
         />
-        
+
         <FormControl fullWidth>
           <InputLabel>Notebook</InputLabel>
           <Select
@@ -162,7 +167,8 @@ export function AddNoteModal({
         />
 
         <Typography variant="caption" color="text.secondary">
-          Notes can contain rich text formatting and will be automatically saved as you type.
+          Notes can contain rich text formatting and will be automatically saved
+          as you type.
         </Typography>
       </Box>
     </Modal>

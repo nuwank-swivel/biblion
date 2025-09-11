@@ -7,25 +7,22 @@ Implement the fundamental note-taking capabilities including rich text editor, n
 ### Story 2.1: Notebook and Page Management System
 
 As a user,
-I want to create and organize notebooks with hierarchical pages,
+I want to create and organize notebooks with flat notes,
 so that I can structure my notes in a logical, organized manner.
 
 Acceptance Criteria:
 
 1. Create notebook creation and deletion functionality
-2. Implement hierarchical page structure within notebooks
-3. Add drag-and-drop page reordering within notebooks
-4. Create page creation, editing, and deletion functionality
-5. Implement infinite nested sub-pages support
-6. Add notebook and page renaming capabilities
-7. Create visual hierarchy display with indentation and icons
-8. Implement quick page navigation with search
-9. Add notebook and page metadata (creation date, last modified)
-10. Store notebook and page structure in Firestore
-11. **NEW:** Implement "New Notebook" modal dialog matching Figma design
-12. **NEW:** Add notebook creation form with name and description fields
-13. **NEW:** Implement form validation and submission handling
-14. **NEW:** Add success feedback and navigation after notebook creation
+2. Add drag-and-drop note reordering within notebooks
+3. Create note creation, editing, and deletion functionality
+4. Add notebook and note renaming capabilities
+5. Implement quick note navigation with search
+6. Add notebook and note metadata (creation date, last modified)
+7. Store notebook and note structure in Firestore
+8. **NEW:** Implement "New Notebook" modal dialog matching Figma design
+9. **NEW:** Add notebook creation form with name and description fields
+10. **NEW:** Implement form validation and submission handling
+11. **NEW:** Add success feedback and navigation after notebook creation
 
 ### Story 2.2: Rich Text Editor Implementation
 

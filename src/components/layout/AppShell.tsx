@@ -13,6 +13,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Menu as MenuIcon, Logout } from "@mui/icons-material";
+import { NavigationSidebar } from "./NavigationSidebar";
 import { NotebooksSidebar } from "./NotebooksSidebar";
 import { NotesList } from "./NotesList";
 import { NoteEditor } from "./NoteEditor";
@@ -23,6 +24,8 @@ import {
   useKeyboardShortcuts,
   commonShortcuts,
 } from "../../hooks/useKeyboardShortcuts";
+import { notebookService } from "../../services/notebookService";
+import { Notebook } from "../../types/notebook";
 
 const DRAWER_WIDTH = 280;
 const NOTES_WIDTH = 320;
@@ -33,11 +36,33 @@ export function AppShell() {
   const { user, reset } = useAuthStore();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [selectedNotebookId, setSelectedNotebookId] = React.useState<string>("1");
+  const [selectedSection, setSelectedSection] =
+    React.useState<string>("documents");
+  const [selectedNotebookId, setSelectedNotebookId] =
+    React.useState<string>("1");
   const [selectedNoteId, setSelectedNoteId] = React.useState<string>("1");
+  const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
 
   // Set up keyboard shortcuts
   useKeyboardShortcuts(commonShortcuts);
+
+  // Load notebooks when user changes
+  React.useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = notebookService.subscribeToNotebooks(
+      user.uid,
+      (notebooks) => {
+        setNotebooks(notebooks);
+        // Auto-select first notebook if none selected
+        if (notebooks.length > 0 && selectedNotebookId === "1") {
+          setSelectedNotebookId(notebooks[0].id);
+        }
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user, selectedNotebookId]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -152,7 +177,7 @@ export function AppShell() {
         {drawer}
       </Drawer>
 
-      {/* Desktop Layout - Three Columns */}
+      {/* Desktop Layout - Four Columns (Navigation + Three Columns) */}
       <Box
         sx={{
           display: { xs: "none", md: "flex" },
@@ -161,6 +186,12 @@ export function AppShell() {
           pt: "64px", // Account for AppBar height
         }}
       >
+        {/* Navigation Sidebar */}
+        <NavigationSidebar
+          selectedSection={selectedSection}
+          onSectionSelect={setSelectedSection}
+        />
+
         {/* Notebooks Column */}
         <Box
           sx={{
@@ -170,7 +201,7 @@ export function AppShell() {
             height: "100%",
           }}
         >
-          <NotebooksSidebar 
+          <NotebooksSidebar
             selectedNotebookId={selectedNotebookId}
             onNotebookSelect={setSelectedNotebookId}
           />
@@ -185,10 +216,11 @@ export function AppShell() {
             height: "100%",
           }}
         >
-          <NotesList 
-            selectedNotebookId={selectedNotebookId} 
+          <NotesList
+            selectedNotebookId={selectedNotebookId}
             selectedNoteId={selectedNoteId}
             onNoteSelect={setSelectedNoteId}
+            notebooks={notebooks}
           />
         </Box>
 
@@ -223,10 +255,11 @@ export function AppShell() {
                 height: "100%",
               }}
             >
-              <NotesList 
-                selectedNotebookId={selectedNotebookId} 
+              <NotesList
+                selectedNotebookId={selectedNotebookId}
                 selectedNoteId={selectedNoteId}
                 onNoteSelect={setSelectedNoteId}
+                notebooks={notebooks}
               />
             </Box>
 
