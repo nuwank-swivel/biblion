@@ -15,39 +15,37 @@ FR4: The system shall implement conflict resolution for simultaneous edits betwe
 FR5: The system shall display background sync status indicators to inform users of sync progress
 FR5.1: The system shall show the currently selected folder name/breadcrumb sourced from Firestore (display-only)
 
-FR6: The system shall allow users to create and organize notebooks with hierarchical structure
+FR6: The system shall allow users to create and organize notebooks with flat note structure
 
-FR7: The system shall support infinite nested pages and sub-pages within notebooks
+FR7: The system shall provide drag-and-drop functionality for note reordering
 
-FR8: The system shall provide drag-and-drop functionality for page reordering
+FR8: The system shall offer quick note navigation and search capabilities
 
-FR9: The system shall offer quick page navigation and search capabilities
+FR9: The system shall provide a rich text editor with essential formatting tools (bold, italic, underline, strikethrough)
 
-FR10: The system shall provide a rich text editor with essential formatting tools (bold, italic, underline, strikethrough)
+FR10: The system shall support font size and family selection
 
-FR11: The system shall support font size and family selection
+FR11: The system shall provide text and highlight color options
 
-FR12: The system shall provide text and highlight color options
+FR12: The system shall support bulleted and numbered lists
 
-FR13: The system shall support bulleted and numbered lists
+FR13: The system shall provide basic paragraph formatting options
 
-FR14: The system shall provide basic paragraph formatting options
+FR14: The system shall implement real-time auto-save every 2 seconds
 
-FR15: The system shall implement real-time auto-save every 2 seconds
+FR15: The system shall maintain version history with restore points
 
-FR16: The system shall maintain version history with restore points
+FR16: The system shall provide offline draft protection
 
-FR17: The system shall provide offline draft protection
+FR17: The system shall include a note recovery system for lost content
 
-FR18: The system shall include a page recovery system for lost content
+FR18: The system shall integrate with Gemini/ChatGPT APIs for AI writing assistance
 
-FR19: The system shall integrate with Gemini/ChatGPT APIs for AI writing assistance
+FR19: The system shall provide grammar and spell check functionality
 
-FR20: The system shall provide grammar and spell check functionality
+FR20: The system shall offer AI-powered rewriting suggestions
 
-FR21: The system shall offer AI-powered rewriting suggestions
-
-FR22: The system shall provide one-click text improvement options
+FR21: The system shall provide one-click text improvement options
 
 ## Non-Functional Requirements
 
