@@ -318,6 +318,10 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
           onInput={handleContentChange}
           onKeyDown={handleKeyDown}
           dangerouslySetInnerHTML={{ __html: noteContent }}
+          role="textbox"
+          aria-label="Note content editor"
+          aria-multiline="true"
+          tabIndex={0}
           sx={{
             height: "100%",
             minHeight: "200px",
@@ -399,6 +403,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("bold")}
                 sx={{ p: 0.5 }}
+                aria-label="Make text bold"
+                role="button"
               >
                 <FormatBoldIcon fontSize="small" />
               </IconButton>
@@ -408,6 +414,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("italic")}
                 sx={{ p: 0.5 }}
+                aria-label="Make text italic"
+                role="button"
               >
                 <FormatItalicIcon fontSize="small" />
               </IconButton>
@@ -417,6 +425,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("underline")}
                 sx={{ p: 0.5 }}
+                aria-label="Make text underlined"
+                role="button"
               >
                 <FormatUnderlinedIcon fontSize="small" />
               </IconButton>
@@ -432,6 +442,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("align-left")}
                 sx={{ p: 0.5 }}
+                aria-label="Align text to left"
+                role="button"
               >
                 <FormatAlignLeftIcon fontSize="small" />
               </IconButton>
@@ -441,6 +453,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("align-center")}
                 sx={{ p: 0.5 }}
+                aria-label="Align text to center"
+                role="button"
               >
                 <FormatAlignCenterIcon fontSize="small" />
               </IconButton>
@@ -450,6 +464,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("align-right")}
                 sx={{ p: 0.5 }}
+                aria-label="Align text to right"
+                role="button"
               >
                 <FormatAlignRightIcon fontSize="small" />
               </IconButton>
@@ -465,6 +481,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("bullet-list")}
                 sx={{ p: 0.5 }}
+                aria-label="Create bullet list"
+                role="button"
               >
                 <FormatListBulletedIcon fontSize="small" />
               </IconButton>
@@ -474,6 +492,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("numbered-list")}
                 sx={{ p: 0.5 }}
+                aria-label="Create numbered list"
+                role="button"
               >
                 <FormatListNumberedIcon fontSize="small" />
               </IconButton>
@@ -489,6 +509,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("quote")}
                 sx={{ p: 0.5 }}
+                aria-label="Create quote block"
+                role="button"
               >
                 <FormatQuoteIcon fontSize="small" />
               </IconButton>
@@ -498,6 +520,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("code")}
                 sx={{ p: 0.5 }}
+                aria-label="Create code block"
+                role="button"
               >
                 <CodeIcon fontSize="small" />
               </IconButton>
@@ -513,6 +537,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("share")}
                 sx={{ p: 0.5 }}
+                aria-label="Share note"
+                role="button"
               >
                 <ShareIcon fontSize="small" />
               </IconButton>
@@ -522,6 +548,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("undo")}
                 sx={{ p: 0.5 }}
+                aria-label="Undo last action"
+                role="button"
               >
                 <HistoryIcon fontSize="small" />
               </IconButton>
@@ -531,6 +559,8 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
                 size="small"
                 onClick={() => handleFormatAction("more")}
                 sx={{ p: 0.5 }}
+                aria-label="More formatting options"
+                role="button"
               >
                 <MoreVertIcon fontSize="small" />
               </IconButton>
