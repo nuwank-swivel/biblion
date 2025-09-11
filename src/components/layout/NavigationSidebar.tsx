@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, IconButton, Tooltip, useTheme } from "@mui/material";
 import {
   Description as DocumentIcon,
@@ -51,7 +50,7 @@ export function NavigationSidebar({
   // Set up keyboard shortcuts for navigation
   const navigationShortcuts = navigationItems.map((item) => ({
     key: item.shortcut,
-    handler: () => handleSectionClick(item.id),
+    action: () => handleSectionClick(item.id),
     description: `Navigate to ${item.label}`,
   }));
 

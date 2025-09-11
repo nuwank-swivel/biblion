@@ -62,20 +62,37 @@ export const notebookService = {
   // Get all notebooks for a user
   async getNotebooks(userId: string): Promise<Notebook[]> {
     try {
+      console.log("notebookService: Getting notebooks for userId:", userId);
+      
       const q = query(
         collection(db, NOTEBOOKS_COLLECTION),
-        where("userId", "==", userId),
-        orderBy("pinned", "desc"),
-        orderBy("updatedAt", "desc")
+        where("userId", "==", userId)
       );
       
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
+      console.log("notebookService: getNotebooks query result:", {
+        size: querySnapshot.size,
+        empty: querySnapshot.empty,
+        docs: querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }))
+      });
+      
+      const notebooks = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as Notebook[];
+      
+      // Sort manually
+      notebooks.sort((a, b) => {
+        if (a.pinned !== b.pinned) {
+          return a.pinned ? -1 : 1;
+        }
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
+      
+      console.log("notebookService: getNotebooks processed result:", notebooks);
+      return notebooks;
     } catch (error) {
       console.error("Error fetching notebooks:", error);
       throw new Error("Failed to fetch notebooks");
@@ -176,11 +193,10 @@ export const notebookService = {
   subscribeToNotebooks(userId: string, callback: (notebooks: Notebook[]) => void): () => void {
     console.log("notebookService: Subscribing to notebooks for userId:", userId);
     
+    // Try a simpler query first without orderBy to avoid index issues
     const q = query(
       collection(db, NOTEBOOKS_COLLECTION),
-      where("userId", "==", userId),
-      orderBy("pinned", "desc"),
-      orderBy("updatedAt", "desc")
+      where("userId", "==", userId)
     );
 
     return onSnapshot(q, (querySnapshot) => {
@@ -196,6 +212,16 @@ export const notebookService = {
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as Notebook[];
+      
+      // Sort manually to avoid Firestore index requirements
+      notebooks.sort((a, b) => {
+        // First sort by pinned status
+        if (a.pinned !== b.pinned) {
+          return a.pinned ? -1 : 1;
+        }
+        // Then sort by updatedAt
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
       
       console.log("notebookService: Processed notebooks:", notebooks);
       callback(notebooks);

@@ -60,18 +60,43 @@ export function NotebooksSidebar({
     console.log("NotebooksSidebar: Loading notebooks for user:", user.uid);
     setLoading(true);
 
+    // Try real-time listener first
     const unsubscribe = notebookService.subscribeToNotebooks(
       user.uid,
       (notebooks) => {
-        console.log("NotebooksSidebar: Received notebooks:", notebooks);
+        console.log("NotebooksSidebar: Received notebooks from real-time listener:", notebooks);
         setNotebooks(notebooks);
         setLoading(false);
         setError(null);
       }
     );
 
+    // Also try a one-time fetch as fallback
+    const fetchNotebooks = async () => {
+      try {
+        console.log("NotebooksSidebar: Fetching notebooks as fallback");
+        const fetchedNotebooks = await notebookService.getNotebooks(user.uid);
+        console.log("NotebooksSidebar: Fetched notebooks:", fetchedNotebooks);
+        
+        // Only update if we don't have notebooks from real-time listener
+        if (notebooks.length === 0 && fetchedNotebooks.length > 0) {
+          setNotebooks(fetchedNotebooks);
+          setLoading(false);
+          setError(null);
+        }
+      } catch (err) {
+        console.error("NotebooksSidebar: Error fetching notebooks:", err);
+        setError("Failed to load notebooks");
+        setLoading(false);
+      }
+    };
+
+    // Run fallback fetch after a short delay
+    const timeoutId = setTimeout(fetchNotebooks, 2000);
+
     return () => {
       console.log("NotebooksSidebar: Unsubscribing from notebooks");
+      clearTimeout(timeoutId);
       unsubscribe();
     };
   }, [user]);
@@ -91,7 +116,9 @@ export function NotebooksSidebar({
 
   const handleSaveNotebook = async (name: string, description: string) => {
     if (!user) {
-      console.log("NotebooksSidebar: No user found when trying to save notebook");
+      console.log(
+        "NotebooksSidebar: No user found when trying to save notebook"
+      );
       return;
     }
 
