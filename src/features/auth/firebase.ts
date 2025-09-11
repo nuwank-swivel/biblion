@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableNetwork, disableNetwork, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
@@ -26,3 +26,28 @@ if (typeof (googleProvider as unknown as { addScope?: (s: string) => void }).add
   );
 }
 export const db = getFirestore(app);
+
+// Enable offline persistence
+let persistenceEnabled = false;
+export const enableOfflinePersistence = async () => {
+  try {
+    await enableIndexedDbPersistence(db);
+    persistenceEnabled = true;
+    console.log('Firestore offline persistence enabled');
+  } catch (error) {
+    console.warn('Failed to enable Firestore offline persistence:', error);
+    // Fallback to network-only mode
+    persistenceEnabled = false;
+  }
+};
+
+export const disableOfflinePersistence = () => {
+  disableNetwork(db);
+  persistenceEnabled = false;
+  console.log('Firestore offline persistence disabled');
+};
+
+export const isPersistenceEnabled = () => persistenceEnabled;
+
+// Initialize offline persistence
+enableOfflinePersistence();

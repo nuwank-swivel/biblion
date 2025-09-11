@@ -1,0 +1,129 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidTimestamp(timestamp) {
+      return timestamp is timestamp && timestamp <= request.time;
+    }
+    
+    function hasValidRevisionId(data) {
+      return data.revisionId is string && data.revisionId.size() > 0;
+    }
+
+    // User configuration rules
+    match /userConfigs/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Notebook rules
+    match /notebooks/{notebookId} {
+      allow read, write: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated() 
+        && request.auth.uid == request.resource.data.userId
+        && isValidTimestamp(request.resource.data.createdAt)
+        && isValidTimestamp(request.resource.data.updatedAt)
+        && hasValidRevisionId(request.resource.data)
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && (request.resource.data.description == null || 
+            (request.resource.data.description is string && 
+             request.resource.data.description.size() <= 1000))
+        && request.resource.data.isPinned is bool;
+      
+      allow update: if isOwner(resource.data.userId)
+        && isValidTimestamp(request.resource.data.updatedAt)
+        && hasValidRevisionId(request.resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && (request.resource.data.description == null || 
+            (request.resource.data.description is string && 
+             request.resource.data.description.size() <= 1000))
+        && request.resource.data.isPinned is bool;
+    }
+
+    // Page rules
+    match /pages/{pageId} {
+      allow read, write: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated() 
+        && request.auth.uid == request.resource.data.userId
+        && isValidTimestamp(request.resource.data.createdAt)
+        && isValidTimestamp(request.resource.data.updatedAt)
+        && hasValidRevisionId(request.resource.data)
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.content is string
+        && request.resource.data.content.size() <= 1000000 // 1MB limit
+        && request.resource.data.notebookId is string
+        && request.resource.data.notebookId.size() > 0
+        && request.resource.data.isPinned is bool
+        && (request.resource.data.parentPageId == null || 
+            request.resource.data.parentPageId is string);
+      
+      allow update: if isOwner(resource.data.userId)
+        && isValidTimestamp(request.resource.data.updatedAt)
+        && hasValidRevisionId(request.resource.data)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.notebookId == resource.data.notebookId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.content is string
+        && request.resource.data.content.size() <= 1000000 // 1MB limit
+        && request.resource.data.isPinned is bool
+        && (request.resource.data.parentPageId == null || 
+            request.resource.data.parentPageId is string);
+    }
+
+    // Version history rules
+    match /versions/{versionId} {
+      allow read, write: if isOwner(resource.data.author);
+      allow create: if isAuthenticated() 
+        && request.auth.uid == request.resource.data.author
+        && isValidTimestamp(request.resource.data.timestamp)
+        && request.resource.data.id is string
+        && request.resource.data.pageId is string
+        && request.resource.data.pageId.size() > 0
+        && request.resource.data.content is string
+        && request.resource.data.content.size() <= 1000000 // 1MB limit
+        && request.resource.data.author is string
+        && request.resource.data.author.size() > 0
+        && request.resource.data.fileSize is number
+        && request.resource.data.fileSize >= 0
+        && request.resource.data.revisionId is string
+        && request.resource.data.revisionId.size() > 0
+        && (request.resource.data.changeSummary == null || 
+            (request.resource.data.changeSummary is string && 
+             request.resource.data.changeSummary.size() <= 500));
+    }
+
+    // Sync status rules (for future use)
+    match /syncStatus/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Performance metrics rules (for future use)
+    match /performanceMetrics/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
