@@ -33,20 +33,22 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { AddNoteModal } from "../ui/AddNoteModal";
-import { Note } from "../../types/notebook";
-import { noteService } from "../../services/notebookService";
+import { Note, Notebook } from "../../types/notebook";
+import { noteService, notebookService } from "../../services/notebookService";
 import { useAuthStore } from "../../features/auth/store";
 
 interface NotesListProps {
   selectedNotebookId?: string;
   selectedNoteId?: string;
   onNoteSelect?: (noteId: string) => void;
+  notebooks?: Notebook[];
 }
 
 export function NotesList({
   selectedNotebookId,
   selectedNoteId,
   onNoteSelect,
+  notebooks = [],
 }: NotesListProps) {
   const { user } = useAuthStore();
   const [viewMode, setViewMode] = React.useState<"list" | "grid">("list");
@@ -92,16 +94,17 @@ export function NotesList({
   const handleSaveNote = async (
     title: string,
     content: string,
-    tags: string[]
+    tags: string[],
+    notebookId: string
   ) => {
-    if (!user || !selectedNotebookId) return;
+    if (!user) return;
 
     try {
       setLoading(true);
       await noteService.createNote(user.uid, {
         title,
         content,
-        notebookId: selectedNotebookId,
+        notebookId,
         pinned: false,
         tags,
       });
@@ -650,7 +653,10 @@ export function NotesList({
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onSave={handleSaveNote}
-        notebooks={[]} // Will be populated from parent component
+        notebooks={notebooks.map((notebook) => ({
+          id: notebook.id,
+          title: notebook.title,
+        }))}
         selectedNotebookId={selectedNotebookId}
       />
     </Box>

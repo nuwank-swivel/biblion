@@ -64,7 +64,10 @@ export function NotebooksSidebar({
     const unsubscribe = notebookService.subscribeToNotebooks(
       user.uid,
       (notebooks) => {
-        console.log("NotebooksSidebar: Received notebooks from real-time listener:", notebooks);
+        console.log(
+          "NotebooksSidebar: Received notebooks from real-time listener:",
+          notebooks
+        );
         setNotebooks(notebooks);
         setLoading(false);
         setError(null);
@@ -77,7 +80,7 @@ export function NotebooksSidebar({
         console.log("NotebooksSidebar: Fetching notebooks as fallback");
         const fetchedNotebooks = await notebookService.getNotebooks(user.uid);
         console.log("NotebooksSidebar: Fetched notebooks:", fetchedNotebooks);
-        
+
         // Only update if we don't have notebooks from real-time listener
         if (notebooks.length === 0 && fetchedNotebooks.length > 0) {
           setNotebooks(fetchedNotebooks);

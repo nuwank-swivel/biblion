@@ -24,6 +24,8 @@ import {
   useKeyboardShortcuts,
   commonShortcuts,
 } from "../../hooks/useKeyboardShortcuts";
+import { notebookService } from "../../services/notebookService";
+import { Notebook } from "../../types/notebook";
 
 const DRAWER_WIDTH = 280;
 const NOTES_WIDTH = 320;
@@ -39,9 +41,28 @@ export function AppShell() {
   const [selectedNotebookId, setSelectedNotebookId] =
     React.useState<string>("1");
   const [selectedNoteId, setSelectedNoteId] = React.useState<string>("1");
+  const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
 
   // Set up keyboard shortcuts
   useKeyboardShortcuts(commonShortcuts);
+
+  // Load notebooks when user changes
+  React.useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = notebookService.subscribeToNotebooks(
+      user.uid,
+      (notebooks) => {
+        setNotebooks(notebooks);
+        // Auto-select first notebook if none selected
+        if (notebooks.length > 0 && selectedNotebookId === "1") {
+          setSelectedNotebookId(notebooks[0].id);
+        }
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user, selectedNotebookId]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -199,6 +220,7 @@ export function AppShell() {
             selectedNotebookId={selectedNotebookId}
             selectedNoteId={selectedNoteId}
             onNoteSelect={setSelectedNoteId}
+            notebooks={notebooks}
           />
         </Box>
 
@@ -237,6 +259,7 @@ export function AppShell() {
                 selectedNotebookId={selectedNotebookId}
                 selectedNoteId={selectedNoteId}
                 onNoteSelect={setSelectedNoteId}
+                notebooks={notebooks}
               />
             </Box>
 
