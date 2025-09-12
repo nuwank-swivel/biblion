@@ -147,17 +147,17 @@ export class SyncManager {
       if (existingNotebook) {
         // Update existing notebook
         await firestoreService.updateNotebook(notebook.id, {
-          title: notebook.title,
+          name: notebook.name,
           description: notebook.description,
-          isPinned: notebook.isPinned,
+          pinned: notebook.pinned,
         });
       } else {
         // Create new notebook
         await firestoreService.createNotebook({
-          title: notebook.title,
+          name: notebook.name,
           description: notebook.description,
           userId: notebook.userId,
-          isPinned: notebook.isPinned,
+          pinned: notebook.pinned,
         });
       }
 

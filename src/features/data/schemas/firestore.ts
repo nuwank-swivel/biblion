@@ -16,13 +16,13 @@ export type UserConfig = z.infer<typeof UserConfigSchema>;
 // Notebook data model
 export const NotebookSchema = z.object({
   id: z.string(),
-  title: z.string(),
+  name: z.string(),
   description: z.string().optional(),
   createdAt: z.instanceof(Timestamp),
   updatedAt: z.instanceof(Timestamp),
   userId: z.string(),
   revisionId: z.string(),
-  isPinned: z.boolean().default(false),
+  pinned: z.boolean().default(false),
 });
 
 export type Notebook = z.infer<typeof NotebookSchema>;
@@ -37,7 +37,7 @@ export const PageSchema = z.object({
   updatedAt: z.instanceof(Timestamp),
   userId: z.string(),
   revisionId: z.string(),
-  isPinned: z.boolean().default(false),
+  pinned: z.boolean().default(false),
   parentPageId: z.string().optional(), // for hierarchical structure
 });
 

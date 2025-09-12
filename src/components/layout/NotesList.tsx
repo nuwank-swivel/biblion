@@ -691,7 +691,7 @@ export const NotesList = React.memo(function NotesList({
         onSave={handleSaveNote}
         notebooks={notebooks.map((notebook) => ({
           id: notebook.id,
-          title: notebook.title,
+          title: notebook.name, // Use 'name' property from Notebook interface
         }))}
         selectedNotebookId={selectedNotebookId}
       />
