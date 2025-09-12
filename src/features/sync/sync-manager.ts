@@ -477,3 +477,4 @@ export class SyncManager {
 
 // Singleton instance
 export const syncManager = new SyncManager();
+

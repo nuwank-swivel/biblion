@@ -350,3 +350,4 @@ export class PerformanceMonitor {
 
 // Singleton instance
 export const performanceMonitor = new PerformanceMonitor();
+

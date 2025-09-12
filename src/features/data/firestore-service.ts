@@ -560,3 +560,4 @@ export class FirestoreService {
 
 // Singleton instance
 export const firestoreService = new FirestoreService();
+
