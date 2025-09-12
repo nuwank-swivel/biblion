@@ -23,3 +23,16 @@ resolved_issues:
     finding: "Limited accessibility features in rich text editor (no ARIA labels, screen reader support)"
     resolution: "✅ RESOLVED - Added ARIA labels, role attributes, and keyboard navigation support"
 waiver: { active: false }
+checks:
+  - id: UI-SEL-001
+    name: "Selected item highlight parity across columns"
+    assert:
+      - "Notebook and Notes list items show yellow left border when selected"
+      - "Selected background uses subtle grey per theme and Figma"
+      - "Accessible state: aria-selected=true present on selected items"
+  - id: UI-PREV-001
+    name: "Notes description preview reflects list formatting"
+    assert:
+      - "Bulleted list shows • markers in preview text"
+      - "Numbered list shows ordinal numbers (1., 2., …) in preview"
+      - "Plain paragraphs remain unmarked"

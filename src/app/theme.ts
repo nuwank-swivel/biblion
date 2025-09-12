@@ -21,6 +21,15 @@ export const theme = createTheme({
     },
     divider: "#e0e0e0", // Light grey for dividers
   },
+  // Custom design tokens for selection highlight parity across lists
+  // These can be referenced in components via theme.vars or custom styles
+  biblion?: {
+    selected: {
+      borderColor: string;
+      borderWidth: number;
+      background: string;
+    };
+  } as any,
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
