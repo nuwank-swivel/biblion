@@ -9,6 +9,8 @@ import {
   Paper,
   Chip,
   Tooltip,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import {
   FormatBold as FormatBoldIcon,
@@ -24,14 +26,22 @@ import {
   Share as ShareIcon,
   History as HistoryIcon,
   MoreVert as MoreVertIcon,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
 import { Note } from "../../types/notebook";
 import { noteService } from "../../services/notebookService";
 import { useAuthStore } from "../../features/auth/store";
 import { autoSaveService } from "../../features/sync/auto-save";
 import { versionManager } from "../../features/sync/version-manager";
+import { conflictDetector } from "../../features/sync/conflict-detector";
+import { conflictService } from "../../features/sync/conflict-service";
 import { SaveStatusIndicator } from "../ui/save-status";
 import { VersionHistory } from "../ui/version-history";
+import { ConflictResolutionDialog } from "../ui/ConflictResolutionDialog";
+import {
+  ConflictData,
+  ConflictResolution,
+} from "../../features/data/schemas/conflict";
 
 interface NoteEditorProps {
   selectedNoteId?: string;
@@ -50,6 +60,20 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
   });
   const [showVersionHistory, setShowVersionHistory] = React.useState(false);
   const [lastContentHash, setLastContentHash] = React.useState<string>("");
+
+  // Conflict resolution state
+  const [activeConflict, setActiveConflict] =
+    React.useState<ConflictData | null>(null);
+  const [showConflictDialog, setShowConflictDialog] = React.useState(false);
+  const [conflictNotification, setConflictNotification] = React.useState<
+    string | null
+  >(null);
+  const [isMonitoringConflicts, setIsMonitoringConflicts] =
+    React.useState(false);
+
+  // Ref for the content editor to avoid React re-rendering issues
+  const editorRef = React.useRef<HTMLDivElement>(null);
+  const isUpdatingFromProps = React.useRef(false);
 
   // Load note when selectedNoteId changes
   React.useEffect(() => {
@@ -85,6 +109,21 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
 
     loadNote();
   }, [user, selectedNoteId]);
+
+  // Update editor content when noteContent changes (but only if different)
+  React.useEffect(() => {
+    const editor = editorRef.current;
+    if (
+      editor &&
+      currentNote &&
+      !isUpdatingFromProps.current &&
+      editor.innerHTML !== noteContent
+    ) {
+      isUpdatingFromProps.current = true;
+      editor.innerHTML = noteContent;
+      isUpdatingFromProps.current = false;
+    }
+  }, [noteContent, currentNote]);
 
   // Auto-save functionality with new service
   React.useEffect(() => {
@@ -128,6 +167,83 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
     setLastContentHash(contentHash);
   }, [noteContent, currentNote, user, lastContentHash]);
 
+  // Conflict detection and monitoring
+  React.useEffect(() => {
+    if (!currentNote || !user) {
+      if (isMonitoringConflicts) {
+        conflictDetector.stopConflictMonitoring(
+          currentNote?.id || "",
+          user?.uid || ""
+        );
+        setIsMonitoringConflicts(false);
+      }
+      return;
+    }
+
+    // Start conflict monitoring
+    if (!isMonitoringConflicts) {
+      conflictDetector.startConflictMonitoring(currentNote.id, user.uid);
+      setIsMonitoringConflicts(true);
+    }
+
+    // Subscribe to conflict events
+    const unsubscribeConflicts = conflictDetector.subscribeToConflicts(
+      currentNote.id,
+      (conflict: ConflictData) => {
+        setActiveConflict(conflict);
+        setShowConflictDialog(true);
+        setConflictNotification(
+          `Conflict detected with user ${
+            conflict.user1Id === user.uid ? conflict.user2Id : conflict.user1Id
+          }`
+        );
+      }
+    );
+
+    return () => {
+      unsubscribeConflicts();
+      if (isMonitoringConflicts) {
+        conflictDetector.stopConflictMonitoring(currentNote.id, user.uid);
+        setIsMonitoringConflicts(false);
+      }
+    };
+  }, [currentNote, user, isMonitoringConflicts]);
+
+  // Detect conflicts when content changes
+  React.useEffect(() => {
+    if (!currentNote || !user || !noteContent || !isMonitoringConflicts) return;
+
+    const detectConflicts = async () => {
+      try {
+        const conflictResult = await conflictDetector.detectConflict(
+          currentNote.id,
+          noteContent,
+          user.uid,
+          new Date()
+        );
+
+        if (conflictResult.hasConflict && conflictResult.conflictId) {
+          const conflict = conflictDetector.getActiveConflicts(
+            currentNote.id
+          )[0];
+          if (conflict) {
+            setActiveConflict(conflict);
+            setShowConflictDialog(true);
+            setConflictNotification(
+              `Conflict detected: ${conflictResult.details}`
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error detecting conflicts:", error);
+      }
+    };
+
+    // Debounce conflict detection
+    const timeoutId = setTimeout(detectConflicts, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [noteContent, currentNote, user, isMonitoringConflicts]);
+
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNoteTitle(event.target.value);
   };
@@ -135,6 +251,41 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
   const handleContentChange = (event: React.FormEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
     setNoteContent(target.innerHTML);
+  };
+
+  // Handle input changes while preserving cursor position
+  const handleInput = (event: React.FormEvent<HTMLDivElement>) => {
+    if (isUpdatingFromProps.current) return;
+
+    const target = event.target as HTMLDivElement;
+    setNoteContent(target.innerHTML);
+  };
+
+  // Conflict resolution handlers
+  const handleConflictResolve = async (resolution: ConflictResolution) => {
+    try {
+      await conflictService.resolveConflict(activeConflict!.id, resolution);
+      setActiveConflict(null);
+      setShowConflictDialog(false);
+      setConflictNotification("Conflict resolved successfully");
+
+      // Refresh the note content if needed
+      if (resolution.mergedContent) {
+        setNoteContent(resolution.mergedContent);
+      }
+    } catch (error) {
+      console.error("Error resolving conflict:", error);
+      setConflictNotification("Failed to resolve conflict");
+    }
+  };
+
+  const handleConflictDialogClose = () => {
+    setShowConflictDialog(false);
+    setActiveConflict(null);
+  };
+
+  const handleConflictNotificationClose = () => {
+    setConflictNotification(null);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -196,7 +347,7 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
   const handleVersionRestore = (version: any) => {
     setNoteContent(version.content);
     // Focus the editor to trigger auto-save
-    const editor = document.getElementById("note-content-editor");
+    const editor = editorRef.current;
     if (editor) {
       editor.focus();
     }
@@ -204,7 +355,7 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
 
   const handleFormatAction = (action: string) => {
     // Focus the content editor before applying formatting
-    const editor = document.getElementById("note-content-editor");
+    const editor = editorRef.current;
     if (editor) {
       editor.focus();
     }
@@ -387,12 +538,12 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
       {/* Note Content */}
       <Box sx={{ flexGrow: 1, p: 2 }}>
         <Box
+          ref={editorRef}
           id="note-content-editor"
           contentEditable
           suppressContentEditableWarning
-          onInput={handleContentChange}
+          onInput={handleInput}
           onKeyDown={handleKeyDown}
-          dangerouslySetInnerHTML={{ __html: noteContent }}
           role="textbox"
           aria-label="Note content editor"
           aria-multiline="true"
@@ -605,6 +756,16 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
 
           <Box sx={{ flexGrow: 1 }} />
 
+          {/* Conflict Status */}
+          {activeConflict && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mr: 2 }}>
+              <WarningIcon color="warning" fontSize="small" />
+              <Typography variant="caption" color="warning.main">
+                Conflict Detected
+              </Typography>
+            </Box>
+          )}
+
           {/* Actions */}
           <Box sx={{ display: "flex", gap: 0.5 }}>
             <Tooltip title="Share">
@@ -653,6 +814,33 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
           onRestore={handleVersionRestore}
         />
       )}
+
+      {/* Conflict Resolution Dialog */}
+      <ConflictResolutionDialog
+        open={showConflictDialog}
+        conflict={activeConflict}
+        onClose={handleConflictDialogClose}
+        onResolve={handleConflictResolve}
+        currentUserId={user?.uid || ""}
+      />
+
+      {/* Conflict Notifications */}
+      <Snackbar
+        open={!!conflictNotification}
+        autoHideDuration={6000}
+        onClose={handleConflictNotificationClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleConflictNotificationClose}
+          severity={
+            conflictNotification?.includes("resolved") ? "success" : "warning"
+          }
+          sx={{ width: "100%" }}
+        >
+          {conflictNotification}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
