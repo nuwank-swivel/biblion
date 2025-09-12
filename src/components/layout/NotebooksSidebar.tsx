@@ -23,6 +23,7 @@ import {
   PushPinOutlined as PushPinOutlinedIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
+import { CircularProgress } from "@mui/material";
 import { AddNotebookModal } from "../ui/AddNotebookModal";
 import { Notebook } from "../../types/notebook";
 import { notebookService } from "../../services/notebookService";
@@ -215,9 +216,17 @@ export function NotebooksSidebar({
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Notebooks
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Notebooks
+          </Typography>
+          {loading && (
+            <CircularProgress 
+              size={16} 
+              sx={{ color: "text.secondary" }} 
+            />
+          )}
+        </Box>
         <IconButton
           onClick={handleAddNotebook}
           sx={{
@@ -236,17 +245,42 @@ export function NotebooksSidebar({
 
       {/* Notebook List */}
       <Box sx={{ flexGrow: 1, overflow: "auto" }}>
-        {loading ? (
-          <Box sx={{ p: 2, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
-              Loading notebooks...
-            </Typography>
-          </Box>
-        ) : error ? (
+        {error ? (
           <Box sx={{ p: 2, textAlign: "center" }}>
             <Typography variant="body2" color="error">
               {error}
             </Typography>
+          </Box>
+        ) : notebooks.length === 0 ? (
+          <Box sx={{ p: 3, textAlign: "center" }}>
+            <FolderIcon 
+              sx={{ 
+                fontSize: 48, 
+                color: "text.disabled", 
+                mb: 2 
+              }} 
+            />
+            <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+              No notebooks yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Create your first notebook to get started organizing your notes
+            </Typography>
+            <IconButton
+              onClick={handleAddNotebook}
+              sx={{
+                backgroundColor: "primary.main",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                },
+                px: 3,
+                py: 1,
+              }}
+            >
+              <AddIcon sx={{ mr: 1 }} />
+              Create Notebook
+            </IconButton>
           </Box>
         ) : (
           <List sx={{ p: 0 }}>
