@@ -35,7 +35,7 @@ interface NotebooksSidebarProps {
   onNotebookSelect?: (notebookId: string) => void;
 }
 
-export function NotebooksSidebar({
+export const NotebooksSidebar = React.memo(function NotebooksSidebar({
   onClose,
   selectedNotebookId,
   onNotebookSelect,
@@ -221,10 +221,7 @@ export function NotebooksSidebar({
             Notebooks
           </Typography>
           {loading && (
-            <CircularProgress 
-              size={16} 
-              sx={{ color: "text.secondary" }} 
-            />
+            <CircularProgress size={16} sx={{ color: "text.secondary" }} />
           )}
         </Box>
         <IconButton
@@ -253,12 +250,12 @@ export function NotebooksSidebar({
           </Box>
         ) : notebooks.length === 0 ? (
           <Box sx={{ p: 3, textAlign: "center" }}>
-            <FolderIcon 
-              sx={{ 
-                fontSize: 48, 
-                color: "text.disabled", 
-                mb: 2 
-              }} 
+            <FolderIcon
+              sx={{
+                fontSize: 48,
+                color: "text.disabled",
+                mb: 2,
+              }}
             />
             <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
               No notebooks yet
@@ -461,4 +458,4 @@ export function NotebooksSidebar({
       />
     </Box>
   );
-}
+});
