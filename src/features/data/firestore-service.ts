@@ -370,6 +370,83 @@ export class FirestoreService {
   }
 
   /**
+   * Set up real-time listener for a specific page
+   */
+  subscribeToPage(
+    pageId: string,
+    callback: (page: Page | null) => void,
+    onError?: (error: FirestoreError) => void
+  ): () => void {
+    const docRef = doc(db, 'pages', pageId);
+    
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap: DocumentSnapshot<DocumentData>) => {
+        if (docSnap.exists()) {
+          const page = { id: docSnap.id, ...docSnap.data() } as Page;
+          callback(page);
+        } else {
+          callback(null);
+        }
+      },
+      (error) => {
+        if (onError) {
+          onError(this.handleFirestoreError(error));
+        }
+      }
+    );
+
+    const listenerId = `page_${pageId}`;
+    this.listeners.set(listenerId, unsubscribe);
+
+    return () => {
+      unsubscribe();
+      this.listeners.delete(listenerId);
+    };
+  }
+
+  /**
+   * Set up real-time listener for a specific note
+   */
+  subscribeToNote(
+    noteId: string,
+    callback: (note: any | null) => void,
+    onError?: (error: FirestoreError) => void
+  ): () => void {
+    const docRef = doc(db, 'notes', noteId);
+    
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap: DocumentSnapshot<DocumentData>) => {
+        if (docSnap.exists()) {
+          const note = { 
+            id: docSnap.id, 
+            ...docSnap.data(),
+            createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+            updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+          };
+          callback(note);
+        } else {
+          callback(null);
+        }
+      },
+      (error) => {
+        if (onError) {
+          onError(this.handleFirestoreError(error));
+        }
+      }
+    );
+
+    const listenerId = `note_${noteId}`;
+    this.listeners.set(listenerId, unsubscribe);
+
+    return () => {
+      unsubscribe();
+      this.listeners.delete(listenerId);
+    };
+  }
+
+  /**
    * Execute batch operations
    */
   async executeBatch(operations: BatchOperation[]): Promise<void> {
@@ -458,6 +535,72 @@ export class FirestoreService {
       this.recordPerformanceMetrics('saveVersion', Date.now() - startTime, true);
     } catch (error) {
       this.recordPerformanceMetrics('saveVersion', Date.now() - startTime, false, error);
+      throw this.handleFirestoreError(error);
+    }
+  }
+
+  /**
+   * Save conflict data
+   */
+  async saveConflict(conflict: any): Promise<void> {
+    const startTime = Date.now();
+    
+    try {
+      const conflictData = {
+        ...conflict,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, 'conflicts'), conflictData);
+      this.recordPerformanceMetrics('saveConflict', Date.now() - startTime, true);
+    } catch (error) {
+      this.recordPerformanceMetrics('saveConflict', Date.now() - startTime, false, error);
+      throw this.handleFirestoreError(error);
+    }
+  }
+
+  /**
+   * Update conflict data
+   */
+  async updateConflict(conflictId: string, updates: any): Promise<void> {
+    const startTime = Date.now();
+    
+    try {
+      const docRef = doc(db, 'conflicts', conflictId);
+      const updateData = {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      };
+
+      await updateDoc(docRef, updateData);
+      this.recordPerformanceMetrics('updateConflict', Date.now() - startTime, true);
+    } catch (error) {
+      this.recordPerformanceMetrics('updateConflict', Date.now() - startTime, false, error);
+      throw this.handleFirestoreError(error);
+    }
+  }
+
+  /**
+   * Get conflict by ID
+   */
+  async getConflict(conflictId: string): Promise<any | null> {
+    const startTime = Date.now();
+    
+    try {
+      const docRef = doc(db, 'conflicts', conflictId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const conflict = { id: docSnap.id, ...docSnap.data() };
+        this.recordPerformanceMetrics('getConflict', Date.now() - startTime, true);
+        return conflict;
+      }
+      
+      this.recordPerformanceMetrics('getConflict', Date.now() - startTime, true);
+      return null;
+    } catch (error) {
+      this.recordPerformanceMetrics('getConflict', Date.now() - startTime, false, error);
       throw this.handleFirestoreError(error);
     }
   }
