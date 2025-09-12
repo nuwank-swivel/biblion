@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback, useRef } from "react";
 import {
   Box,
   Typography,
@@ -44,7 +44,7 @@ interface NotesListProps {
   notebooks?: Notebook[];
 }
 
-export function NotesList({
+export const NotesList = React.memo(function NotesList({
   selectedNotebookId,
   selectedNoteId,
   onNoteSelect,
@@ -64,67 +64,90 @@ export function NotesList({
   const [error, setError] = React.useState<string | null>(null);
   const [draggedNoteId, setDraggedNoteId] = React.useState<string | null>(null);
 
+  // Use ref to track selected note without causing re-renders
+  const selectedNoteIdRef = useRef(selectedNoteId);
+  selectedNoteIdRef.current = selectedNoteId;
+
+  // Track if we've loaded notes for the current notebook
+  const loadedNotebookRef = useRef<string | null>(null);
+
+  // Memoize the callback to prevent unnecessary re-subscriptions
+  const handleNotesUpdate = useCallback(
+    (notes: Note[]) => {
+      setNotes(notes);
+      setLoading(false);
+      setError(null);
+
+      // Auto-select first note if no note is currently selected
+      // Only do this once when notes are first loaded, not on every update
+      if (notes.length > 0 && !selectedNoteIdRef.current && onNoteSelect) {
+        onNoteSelect(notes[0].id);
+      }
+    },
+    [onNoteSelect] // Remove selectedNoteId from dependencies to prevent re-subscriptions
+  );
+
   // Load notes when selectedNotebookId changes
   React.useEffect(() => {
     if (!user || !selectedNotebookId) return;
 
-    setLoading(true);
+    // Only show loading if we haven't loaded notes for this notebook yet
+    if (loadedNotebookRef.current !== selectedNotebookId) {
+      setLoading(true);
+      loadedNotebookRef.current = selectedNotebookId;
+    }
+
     const unsubscribe = noteService.subscribeToNotes(
       selectedNotebookId,
-      (notes) => {
-        setNotes(notes);
-        setLoading(false);
-        setError(null);
-
-        // Auto-select first note if no note is currently selected
-        if (notes.length > 0 && !selectedNoteId && onNoteSelect) {
-          onNoteSelect(notes[0].id);
-        }
-      }
+      handleNotesUpdate
     );
 
     return () => unsubscribe();
-  }, [user, selectedNotebookId, selectedNoteId, onNoteSelect]);
+  }, [user, selectedNotebookId, handleNotesUpdate]);
 
-  const handleNoteClick = (noteId: string) => {
-    if (onNoteSelect) {
-      onNoteSelect(noteId);
-    }
-  };
-
-  const handleAddNote = () => {
-    setAddModalOpen(true);
-  };
-
-  const handleSaveNote = async (
-    title: string,
-    content: string,
-    tags: string[],
-    notebookId: string
-  ) => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      const newNoteId = await noteService.createNote(user.uid, {
-        title,
-        content,
-        notebookId,
-        pinned: false,
-        tags,
-      });
-
-      // Auto-select the newly created note
-      if (onNoteSelect && newNoteId) {
-        onNoteSelect(newNoteId);
+  const handleNoteClick = useCallback(
+    (noteId: string) => {
+      if (onNoteSelect) {
+        onNoteSelect(noteId);
       }
-    } catch (err) {
-      setError("Failed to create note");
-      console.error("Error creating note:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [onNoteSelect]
+  );
+
+  const handleAddNote = useCallback(() => {
+    setAddModalOpen(true);
+  }, []);
+
+  const handleSaveNote = useCallback(
+    async (
+      title: string,
+      content: string,
+      tags: string[],
+      notebookId: string
+    ) => {
+      if (!user) return;
+
+      try {
+        const newNoteId = await noteService.createNote(user.uid, {
+          title,
+          content,
+          notebookId,
+          pinned: false,
+          tags,
+        });
+
+        // Auto-select the newly created note
+        if (onNoteSelect && newNoteId) {
+          onNoteSelect(newNoteId);
+        }
+      } catch (err) {
+        setError("Failed to create note");
+        console.error("Error creating note:", err);
+      }
+      // Remove loading state - real-time subscription will handle updates
+    },
+    [user, onNoteSelect]
+  );
 
   const handleViewModeChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -236,18 +259,21 @@ export function NotesList({
     setDraggedNoteId(null);
   };
 
-  const filteredNotes = notes.filter((note) => {
-    // Filter by search query if provided
-    const matchesSearch =
-      searchQuery === "" ||
-      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.tags.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  // Memoize filtered notes to prevent unnecessary recalculations
+  const filteredNotes = useMemo(() => {
+    return notes.filter((note) => {
+      // Filter by search query if provided
+      const matchesSearch =
+        searchQuery === "" ||
+        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        note.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
-    return matchesSearch;
-  });
+      return matchesSearch;
+    });
+  }, [notes, searchQuery]);
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -665,10 +691,10 @@ export function NotesList({
         onSave={handleSaveNote}
         notebooks={notebooks.map((notebook) => ({
           id: notebook.id,
-          title: notebook.title,
+          title: notebook.name, // Use 'name' property from Notebook interface
         }))}
         selectedNotebookId={selectedNotebookId}
       />
     </Box>
   );
-}
+});
