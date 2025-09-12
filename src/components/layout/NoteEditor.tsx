@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -47,7 +47,9 @@ interface NoteEditorProps {
   selectedNoteId?: string;
 }
 
-export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
+export const NoteEditor = React.memo(function NoteEditor({
+  selectedNoteId,
+}: NoteEditorProps) {
   const { user } = useAuthStore();
   const [currentNote, setCurrentNote] = React.useState<Note | null>(null);
   const [noteTitle, setNoteTitle] = React.useState("");
@@ -843,4 +845,4 @@ export function NoteEditor({ selectedNoteId }: NoteEditorProps) {
       </Snackbar>
     </Box>
   );
-}
+});

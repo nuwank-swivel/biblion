@@ -261,20 +261,32 @@ export const noteService = {
   // Get all notes for a notebook
   async getNotes(notebookId: string): Promise<Note[]> {
     try {
+      // Use a simpler query without orderBy to avoid Firestore index requirements
       const q = query(
         collection(db, NOTES_COLLECTION),
-        where("notebookId", "==", notebookId),
-        orderBy("pinned", "desc"),
-        orderBy("updatedAt", "desc")
+        where("notebookId", "==", notebookId)
       );
       
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
+      const notes = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as Note[];
+      
+      // Sort manually to maintain stable order
+      notes.sort((a, b) => {
+        // First sort by pinned status (pinned notes first)
+        if (a.pinned !== b.pinned) {
+          return a.pinned ? -1 : 1;
+        }
+        // Then sort by creation date (newer notes first)
+        // Using createdAt instead of updatedAt prevents order changes on selection
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+      
+      return notes;
     } catch (error) {
       console.error("Error fetching notes:", error);
       throw new Error("Failed to fetch notes");
@@ -390,11 +402,11 @@ export const noteService = {
 
   // Subscribe to notes changes for a notebook
   subscribeToNotes(notebookId: string, callback: (notes: Note[]) => void): () => void {
+    // Use a simpler query without orderBy to avoid Firestore index requirements
+    // and prevent order changes when notes are updated
     const q = query(
       collection(db, NOTES_COLLECTION),
-      where("notebookId", "==", notebookId),
-      orderBy("pinned", "desc"),
-      orderBy("updatedAt", "desc")
+      where("notebookId", "==", notebookId)
     );
 
     return onSnapshot(q, (querySnapshot) => {
@@ -404,6 +416,18 @@ export const noteService = {
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as Note[];
+      
+      // Sort manually to maintain stable order
+      // This prevents the list from appearing to "reload" when notes are selected
+      notes.sort((a, b) => {
+        // First sort by pinned status (pinned notes first)
+        if (a.pinned !== b.pinned) {
+          return a.pinned ? -1 : 1;
+        }
+        // Then sort by creation date (newer notes first)
+        // Using createdAt instead of updatedAt prevents order changes on selection
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
       
       callback(notes);
     });

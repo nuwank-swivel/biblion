@@ -266,8 +266,8 @@ export class DataValidator {
   private generateNotebookWarnings(notebook: Notebook): string[] {
     const warnings: string[] = [];
 
-    if (notebook.title.length > 100) {
-      warnings.push('Notebook title is quite long, consider shortening it');
+    if (notebook.name.length > 100) {
+      warnings.push('Notebook name is quite long, consider shortening it');
     }
 
     if (notebook.description && notebook.description.length > 500) {

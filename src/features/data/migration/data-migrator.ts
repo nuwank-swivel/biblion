@@ -184,11 +184,11 @@ export class DataMigrator {
   private fixNotebookData(notebook: any): Partial<Notebook> {
     const fixed: any = {};
 
-    // Fix title
-    if (typeof notebook.title !== 'string' || notebook.title.trim().length === 0) {
-      fixed.title = 'Untitled Notebook';
+    // Fix name
+    if (typeof notebook.name !== 'string' || notebook.name.trim().length === 0) {
+      fixed.name = 'Untitled Notebook';
     } else {
-      fixed.title = notebook.title.trim().substring(0, 200);
+      fixed.name = notebook.name.trim().substring(0, 200);
     }
 
     // Fix description
@@ -412,10 +412,10 @@ export class DataMigrator {
           const validation = dataValidator.validateNotebook(notebook);
           if (validation.isValid) {
             await firestoreService.createNotebook({
-              title: notebook.title,
+              name: notebook.name,
               description: notebook.description,
               userId: userId, // Override with current user ID
-              isPinned: notebook.isPinned,
+              pinned: notebook.pinned,
             });
             result.migratedCount++;
           } else {
