@@ -38,9 +38,12 @@ export function AppShell() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedSection, setSelectedSection] =
     React.useState<string>("documents");
-  const [selectedNotebookId, setSelectedNotebookId] =
-    React.useState<string>("1");
-  const [selectedNoteId, setSelectedNoteId] = React.useState<string>("1");
+  const [selectedNotebookId, setSelectedNotebookId] = React.useState<
+    string | undefined
+  >(undefined);
+  const [selectedNoteId, setSelectedNoteId] = React.useState<
+    string | undefined
+  >(undefined);
   const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
 
   // Set up keyboard shortcuts
@@ -55,7 +58,7 @@ export function AppShell() {
       (notebooks) => {
         setNotebooks(notebooks);
         // Auto-select first notebook if none selected
-        if (notebooks.length > 0 && selectedNotebookId === "1") {
+        if (notebooks.length > 0 && !selectedNotebookId) {
           setSelectedNotebookId(notebooks[0].id);
         }
       }
@@ -63,6 +66,11 @@ export function AppShell() {
 
     return () => unsubscribe();
   }, [user, selectedNotebookId]);
+
+  // Reset selected note when notebook changes
+  React.useEffect(() => {
+    setSelectedNoteId(undefined);
+  }, [selectedNotebookId]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);

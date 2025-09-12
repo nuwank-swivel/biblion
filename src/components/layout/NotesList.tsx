@@ -75,11 +75,16 @@ export function NotesList({
         setNotes(notes);
         setLoading(false);
         setError(null);
+
+        // Auto-select first note if no note is currently selected
+        if (notes.length > 0 && !selectedNoteId && onNoteSelect) {
+          onNoteSelect(notes[0].id);
+        }
       }
     );
 
     return () => unsubscribe();
-  }, [user, selectedNotebookId]);
+  }, [user, selectedNotebookId, selectedNoteId, onNoteSelect]);
 
   const handleNoteClick = (noteId: string) => {
     if (onNoteSelect) {
@@ -101,13 +106,18 @@ export function NotesList({
 
     try {
       setLoading(true);
-      await noteService.createNote(user.uid, {
+      const newNoteId = await noteService.createNote(user.uid, {
         title,
         content,
         notebookId,
         pinned: false,
         tags,
       });
+
+      // Auto-select the newly created note
+      if (onNoteSelect && newNoteId) {
+        onNoteSelect(newNoteId);
+      }
     } catch (err) {
       setError("Failed to create note");
       console.error("Error creating note:", err);
