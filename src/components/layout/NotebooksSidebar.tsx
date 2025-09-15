@@ -22,6 +22,8 @@ import {
   PushPin as PushPinIcon,
   PushPinOutlined as PushPinOutlinedIcon,
   Delete as DeleteIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import { AddNotebookModal } from "../ui/AddNotebookModal";
@@ -33,12 +35,18 @@ interface NotebooksSidebarProps {
   onClose?: () => void;
   selectedNotebookId?: string;
   onNotebookSelect?: (notebookId: string) => void;
+  isCollapsible?: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const NotebooksSidebar = React.memo(function NotebooksSidebar({
   onClose,
   selectedNotebookId,
   onNotebookSelect,
+  isCollapsible = false,
+  isCollapsed = false,
+  onToggleCollapse,
 }: NotebooksSidebarProps) {
   const { user } = useAuthStore();
   const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
@@ -217,6 +225,22 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isCollapsible && (
+            <IconButton
+              onClick={onToggleCollapse}
+              size="small"
+              aria-label={isCollapsed ? "Expand notebooks column" : "Collapse notebooks column"}
+              sx={{
+                mr: 1,
+                color: "text.secondary",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
+              }}
+            >
+              {isCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+            </IconButton>
+          )}
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Notebooks
           </Typography>
