@@ -12,7 +12,11 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { Menu as MenuIcon, Logout, ChevronRight as ChevronRightIcon } from "@mui/icons-material";
+import {
+  Menu as MenuIcon,
+  Logout,
+  ChevronRight as ChevronRightIcon,
+} from "@mui/icons-material";
 import { NavigationSidebar } from "./NavigationSidebar";
 import { NotebooksSidebar } from "./NotebooksSidebar";
 import { NotesList } from "./NotesList";
@@ -46,13 +50,10 @@ export function AppShell() {
     string | undefined
   >(undefined);
   const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
-  
+
   // Column visibility state
-  const {
-    isNotebooksColumnVisible,
-    isAutoCollapsed,
-    toggleColumnVisibility,
-  } = useColumnVisibility();
+  const { isNotebooksColumnVisible, isAutoCollapsed, toggleColumnVisibility } =
+    useColumnVisibility();
 
   // Set up keyboard shortcuts
   useKeyboardShortcuts(commonShortcuts);
@@ -132,7 +133,7 @@ export function AppShell() {
             </IconButton>
           )}
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Biblion
+            BibliON 1.0
           </Typography>
           {user && (
             <IconButton
