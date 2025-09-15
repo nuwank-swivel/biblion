@@ -251,7 +251,6 @@ export function AppShell() {
                 "&:hover": {
                   backgroundColor: "action.hover",
                 },
-                transform: "rotate(90deg)",
               }}
             >
               <ChevronRightIcon fontSize="small" />
