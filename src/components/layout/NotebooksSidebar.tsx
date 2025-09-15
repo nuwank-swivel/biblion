@@ -290,10 +290,11 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
                   sx={{
                     px: 2,
                     py: 1.5,
+                    transition: "all 0.2s ease-in-out",
                     "&.Mui-selected": {
-                      backgroundColor: "#FFD700", // Yellow accent color
+                      backgroundColor: "#F5F5F5", // Subtle grey background
                       "&:hover": {
-                        backgroundColor: "#E6C200",
+                        backgroundColor: "#EEEEEE",
                       },
                       "&::before": {
                         content: '""',
@@ -301,8 +302,8 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
                         left: 0,
                         top: 0,
                         bottom: 0,
-                        width: 4,
-                        backgroundColor: "#FFD700",
+                        width: 3, // 2-3px width as specified
+                        backgroundColor: "#FFD700", // Yellow left border
                       },
                     },
                   }}

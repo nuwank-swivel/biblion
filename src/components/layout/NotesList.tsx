@@ -36,6 +36,10 @@ import { AddNoteModal } from "../ui/AddNoteModal";
 import { Note, Notebook } from "../../types/notebook";
 import { noteService, notebookService } from "../../services/notebookService";
 import { useAuthStore } from "../../features/auth/store";
+import {
+  formatNotePreview,
+  formatPreviewText,
+} from "../../utils/notePreviewFormatter";
 
 interface NotesListProps {
   selectedNotebookId?: string;
@@ -393,13 +397,14 @@ export const NotesList = React.memo(function NotesList({
                       px: 2,
                       py: 1.5,
                       cursor: "grab",
+                      transition: "all 0.2s ease-in-out",
                       "&:active": {
                         cursor: "grabbing",
                       },
                       "&.Mui-selected": {
-                        backgroundColor: "#FFD700", // Yellow accent color
+                        backgroundColor: "#F5F5F5", // Subtle grey background
                         "&:hover": {
-                          backgroundColor: "#E6C200",
+                          backgroundColor: "#EEEEEE",
                         },
                         "&::before": {
                           content: '""',
@@ -407,8 +412,8 @@ export const NotesList = React.memo(function NotesList({
                           left: 0,
                           top: 0,
                           bottom: 0,
-                          width: 4,
-                          backgroundColor: "#FFD700",
+                          width: 3, // 2-3px width as specified
+                          backgroundColor: "#FFD700", // Yellow left border
                         },
                       },
                       opacity: draggedNoteId === note.id ? 0.5 : 1,
@@ -452,9 +457,12 @@ export const NotesList = React.memo(function NotesList({
                               WebkitBoxOrient: "vertical",
                               overflow: "hidden",
                               mb: 1,
+                              whiteSpace: "pre-line",
+                              fontFamily: "monospace",
+                              fontSize: "0.75rem",
                             }}
                           >
-                            {note.content}
+                            {formatPreviewText(note.content, 80)}
                           </Typography>
                           <Box
                             sx={{
@@ -513,15 +521,17 @@ export const NotesList = React.memo(function NotesList({
                   <Card
                     sx={{
                       cursor: "grab",
+                      transition: "all 0.2s ease-in-out",
                       "&:active": {
                         cursor: "grabbing",
                       },
-                      border: selectedNoteId === note.id ? 2 : 1,
+                      border: selectedNoteId === note.id ? 3 : 1,
                       borderColor:
                         selectedNoteId === note.id ? "#FFD700" : "divider",
+                      borderLeftWidth: selectedNoteId === note.id ? 3 : 1,
                       backgroundColor:
                         selectedNoteId === note.id
-                          ? "#FFF9C4"
+                          ? "#F5F5F5" // Subtle grey background
                           : "background.paper",
                       "&:hover": {
                         boxShadow: 2,
@@ -584,9 +594,12 @@ export const NotesList = React.memo(function NotesList({
                           WebkitBoxOrient: "vertical",
                           overflow: "hidden",
                           mb: 1,
+                          whiteSpace: "pre-line",
+                          fontFamily: "monospace",
+                          fontSize: "0.75rem",
                         }}
                       >
-                        {note.content}
+                        {formatPreviewText(note.content, 120)}
                       </Typography>
                       <Box
                         sx={{
