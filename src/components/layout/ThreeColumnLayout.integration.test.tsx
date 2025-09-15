@@ -297,6 +297,29 @@ describe("Three Column Layout Integration", () => {
     expect(screen.getByText("Ideas")).toBeInTheDocument();
   });
 
+  it.skip("shows selected highlight parity across Notebooks and Notes columns", async () => {
+    render(<AppShell />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Work Notes")).toBeInTheDocument();
+    });
+
+    // Select notebook and note
+    fireEvent.click(screen.getByText("Work Notes"));
+    await waitFor(() => {
+      expect(screen.getByText("Meeting Notes")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("Meeting Notes"));
+
+    // Notebook item should show yellow border
+    const selectedNotebook = screen.getByText("Work Notes").closest("div");
+    expect(selectedNotebook).toHaveStyle(`border-left: 4px solid`);
+
+    // Note item should show the same border style
+    const selectedNote = screen.getByText("Meeting Notes").closest("div");
+    expect(selectedNote).toHaveStyle(`border-left: 4px solid`);
+  });
+
   it("handles pin/unpin functionality across components", async () => {
     render(<AppShell />);
 

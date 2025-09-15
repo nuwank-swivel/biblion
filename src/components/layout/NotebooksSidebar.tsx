@@ -22,6 +22,8 @@ import {
   PushPin as PushPinIcon,
   PushPinOutlined as PushPinOutlinedIcon,
   Delete as DeleteIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import { AddNotebookModal } from "../ui/AddNotebookModal";
@@ -33,12 +35,18 @@ interface NotebooksSidebarProps {
   onClose?: () => void;
   selectedNotebookId?: string;
   onNotebookSelect?: (notebookId: string) => void;
+  isCollapsible?: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const NotebooksSidebar = React.memo(function NotebooksSidebar({
   onClose,
   selectedNotebookId,
   onNotebookSelect,
+  isCollapsible = false,
+  isCollapsed = false,
+  onToggleCollapse,
 }: NotebooksSidebarProps) {
   const { user } = useAuthStore();
   const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
@@ -217,6 +225,30 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isCollapsible && (
+            <IconButton
+              onClick={onToggleCollapse}
+              size="small"
+              aria-label={
+                isCollapsed
+                  ? "Expand notebooks column"
+                  : "Collapse notebooks column"
+              }
+              sx={{
+                mr: 1,
+                color: "text.secondary",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
+              }}
+            >
+              {isCollapsed ? (
+                <ChevronRightIcon fontSize="small" />
+              ) : (
+                <ChevronLeftIcon fontSize="small" />
+              )}
+            </IconButton>
+          )}
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Notebooks
           </Typography>
@@ -260,24 +292,9 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
             <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
               No notebooks yet
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary">
               Create your first notebook to get started organizing your notes
             </Typography>
-            <IconButton
-              onClick={handleAddNotebook}
-              sx={{
-                backgroundColor: "primary.main",
-                color: "white",
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                },
-                px: 3,
-                py: 1,
-              }}
-            >
-              <AddIcon sx={{ mr: 1 }} />
-              Create Notebook
-            </IconButton>
           </Box>
         ) : (
           <List sx={{ p: 0 }}>
@@ -290,10 +307,11 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
                   sx={{
                     px: 2,
                     py: 1.5,
+                    transition: "all 0.2s ease-in-out",
                     "&.Mui-selected": {
-                      backgroundColor: "#FFD700", // Yellow accent color
+                      backgroundColor: "#F5F5F5", // Subtle grey background
                       "&:hover": {
-                        backgroundColor: "#E6C200",
+                        backgroundColor: "#EEEEEE",
                       },
                       "&::before": {
                         content: '""',
@@ -301,8 +319,8 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
                         left: 0,
                         top: 0,
                         bottom: 0,
-                        width: 4,
-                        backgroundColor: "#FFD700",
+                        width: 3, // 2-3px width as specified
+                        backgroundColor: "#FFD700", // Yellow left border
                       },
                     },
                   }}

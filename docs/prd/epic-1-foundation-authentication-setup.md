@@ -1,6 +1,5 @@
 # Epic 1 - foundation-authentication-setup.md
 
-
 ## Epic Goal
 
 Establish project infrastructure, Firebase integration, and Google SSO authentication to enable secure user access and basic app functionality.
@@ -64,3 +63,17 @@ Acceptance Criteria:
 11. **NEW:** Implement "Add Notebook" and "Add Notes" buttons with yellow styling matching Figma design
 12. **NEW:** Create modal dialog infrastructure for notebook and note creation
 13. **NEW:** Add modal overlay and positioning system for consistent UX
+
+### Story 1.4: Update App Name to BibliON 1.0
+
+As a user,
+I want to see the updated app name "BibliON 1.0" in the header,
+so that I can identify the current version of the application I'm using.
+
+Acceptance Criteria:
+
+1. Update the app name displayed in the header from "Biblion" to "BibliON 1.0"
+2. Ensure the updated name is visible in both desktop and mobile layouts
+3. Maintain consistent styling and positioning of the app name
+4. Verify the change is reflected across all screen sizes and responsive breakpoints
+5. Ensure the app name change doesn't affect other header functionality (user profile, logout, etc.)

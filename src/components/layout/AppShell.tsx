@@ -12,7 +12,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { Menu as MenuIcon, Logout } from "@mui/icons-material";
+import { Menu as MenuIcon, Logout, ChevronRight as ChevronRightIcon } from "@mui/icons-material";
 import { NavigationSidebar } from "./NavigationSidebar";
 import { NotebooksSidebar } from "./NotebooksSidebar";
 import { NotesList } from "./NotesList";
@@ -24,6 +24,7 @@ import {
   useKeyboardShortcuts,
   commonShortcuts,
 } from "../../hooks/useKeyboardShortcuts";
+import { useColumnVisibility } from "../../hooks/useColumnVisibility";
 import { notebookService } from "../../services/notebookService";
 import { Notebook } from "../../types/notebook";
 
@@ -45,6 +46,13 @@ export function AppShell() {
     string | undefined
   >(undefined);
   const [notebooks, setNotebooks] = React.useState<Notebook[]>([]);
+  
+  // Column visibility state
+  const {
+    isNotebooksColumnVisible,
+    isAutoCollapsed,
+    toggleColumnVisibility,
+  } = useColumnVisibility();
 
   // Set up keyboard shortcuts
   useKeyboardShortcuts(commonShortcuts);
@@ -201,19 +209,54 @@ export function AppShell() {
         />
 
         {/* Notebooks Column */}
-        <Box
-          sx={{
-            width: DRAWER_WIDTH,
-            borderRight: 1,
-            borderColor: "divider",
-            height: "100%",
-          }}
-        >
-          <NotebooksSidebar
-            selectedNotebookId={selectedNotebookId}
-            onNotebookSelect={setSelectedNotebookId}
-          />
-        </Box>
+        {isNotebooksColumnVisible ? (
+          <Box
+            sx={{
+              width: DRAWER_WIDTH,
+              borderRight: 1,
+              borderColor: "divider",
+              height: "100%",
+              transition: `width ${theme.transitions.duration.standard}ms ${theme.transitions.easing.easeInOut}`,
+            }}
+          >
+            <NotebooksSidebar
+              selectedNotebookId={selectedNotebookId}
+              onNotebookSelect={setSelectedNotebookId}
+              isCollapsible={true}
+              isCollapsed={false}
+              onToggleCollapse={toggleColumnVisibility}
+            />
+          </Box>
+        ) : (
+          /* Collapsed state indicator */
+          <Box
+            sx={{
+              width: 48,
+              borderRight: 1,
+              borderColor: "divider",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "background.paper",
+              transition: `width ${theme.transitions.duration.standard}ms ${theme.transitions.easing.easeInOut}`,
+            }}
+          >
+            <IconButton
+              onClick={toggleColumnVisibility}
+              size="small"
+              aria-label="Expand notebooks column"
+              sx={{
+                color: "text.secondary",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
+              }}
+            >
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        )}
 
         {/* Notes List Column */}
         <Box

@@ -3,7 +3,7 @@ import { createTheme } from "@mui/material/styles";
 export const theme = createTheme({
   palette: {
     mode: "light",
-    primary: { 
+    primary: {
       main: "#FFD700", // Yellow for primary actions and accents
       dark: "#FFC107",
       light: "#FFF59D",
@@ -11,7 +11,7 @@ export const theme = createTheme({
     secondary: {
       main: "#1976d2", // Blue for secondary actions
     },
-    background: { 
+    background: {
       default: "#ffffff", // Clean white background
       paper: "#fafafa", // Light grey for paper surfaces
     },
@@ -21,6 +21,8 @@ export const theme = createTheme({
     },
     divider: "#e0e0e0", // Light grey for dividers
   },
+  // Custom design tokens for selection highlight parity across lists
+  // These can be referenced in components via theme.vars or custom styles
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
