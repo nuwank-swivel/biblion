@@ -256,6 +256,20 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
             <CircularProgress size={16} sx={{ color: "text.secondary" }} />
           )}
         </Box>
+        <IconButton
+          onClick={handleAddNotebook}
+          sx={{
+            backgroundColor: "primary.main",
+            color: "text.primary",
+            "&:hover": {
+              backgroundColor: "primary.dark",
+            },
+            width: 32,
+            height: 32,
+          }}
+        >
+          <AddIcon fontSize="small" />
+        </IconButton>
       </Box>
 
       {/* Notebook List */}
@@ -278,24 +292,9 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
             <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
               No notebooks yet
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary">
               Create your first notebook to get started organizing your notes
             </Typography>
-            <IconButton
-              onClick={handleAddNotebook}
-              sx={{
-                backgroundColor: "primary.main",
-                color: "white",
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                },
-                px: 3,
-                py: 1,
-              }}
-            >
-              <AddIcon sx={{ mr: 1 }} />
-              Create Notebook
-            </IconButton>
           </Box>
         ) : (
           <List sx={{ p: 0 }}>
