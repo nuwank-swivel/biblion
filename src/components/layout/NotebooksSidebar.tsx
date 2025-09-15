@@ -229,7 +229,11 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
             <IconButton
               onClick={onToggleCollapse}
               size="small"
-              aria-label={isCollapsed ? "Expand notebooks column" : "Collapse notebooks column"}
+              aria-label={
+                isCollapsed
+                  ? "Expand notebooks column"
+                  : "Collapse notebooks column"
+              }
               sx={{
                 mr: 1,
                 color: "text.secondary",
@@ -238,7 +242,11 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
                 },
               }}
             >
-              {isCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+              {isCollapsed ? (
+                <ChevronRightIcon fontSize="small" />
+              ) : (
+                <ChevronLeftIcon fontSize="small" />
+              )}
             </IconButton>
           )}
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
