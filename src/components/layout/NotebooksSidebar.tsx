@@ -256,20 +256,6 @@ export const NotebooksSidebar = React.memo(function NotebooksSidebar({
             <CircularProgress size={16} sx={{ color: "text.secondary" }} />
           )}
         </Box>
-        <IconButton
-          onClick={handleAddNotebook}
-          sx={{
-            backgroundColor: "primary.main",
-            color: "text.primary",
-            "&:hover": {
-              backgroundColor: "primary.dark",
-            },
-            width: 32,
-            height: 32,
-          }}
-        >
-          <AddIcon fontSize="small" />
-        </IconButton>
       </Box>
 
       {/* Notebook List */}
