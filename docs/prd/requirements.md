@@ -47,7 +47,6 @@ FR20: The system shall offer AI-powered rewriting suggestions
 
 FR21: The system shall provide one-click text improvement options
 
-FR22: The system shall display the product name and version as "Biblion 1.0" on the home screen and browser tab
 
 ## Non-Functional Requirements
 
