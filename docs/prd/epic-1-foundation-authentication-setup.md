@@ -64,18 +64,3 @@ Acceptance Criteria:
 11. **NEW:** Implement "Add Notebook" and "Add Notes" buttons with yellow styling matching Figma design
 12. **NEW:** Create modal dialog infrastructure for notebook and note creation
 13. **NEW:** Add modal overlay and positioning system for consistent UX
-
-### Story 1.4: Home Screen Title Shows "Biblion 1.0"
-
-As a user,
-I want the home screen to show the versioned app name "Biblion 1.0",
-so that I can immediately confirm which version of the app I am using.
-
-Acceptance Criteria:
-
-1. The home screen title displays the exact text: "Biblion 1.0".
-2. Typography, size, weight, and alignment follow the Figma reference.
-3. No other copy is changed; scope limited to the home screen title.
-4. Change is purely presentational; no functional behavior is altered.
-5. Title remains responsive and does not wrap on standard desktop widths.
-6. Tests assert the presence of "Biblion 1.0" on the home route.
