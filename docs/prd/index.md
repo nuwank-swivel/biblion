@@ -28,6 +28,7 @@
       - [Story 1.1: Project Setup and Firebase Configuration](./epic-1-foundation-authentication-setup.md#story-11-project-setup-and-firebase-configuration)
       - [Story 1.2: Google SSO Authentication](./epic-1-foundation-authentication-setup.md#story-12-google-sso-authentication)
       - [Story 1.3: Basic App Shell and Navigation](./epic-1-foundation-authentication-setup.md#story-13-basic-app-shell-and-navigation)
+      - [Story 1.4 CR1: Home Header Branding — Display “Biblion 1.0”](./epic-1-foundation-authentication-setup.md#story-14-cr1-home-header-branding--display-biblion-10)
   - [Epic 2 Core Note-Taking Infrastructure](./epic-2-core-note-taking-infrastructure.md)
     - [Epic Goal](./epic-2-core-note-taking-infrastructure.md#epic-goal)
       - [Story 2.1: Notebook and Page Management System](./epic-2-core-note-taking-infrastructure.md#story-21-notebook-and-page-management-system)
