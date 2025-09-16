@@ -64,17 +64,3 @@ Acceptance Criteria:
 11. **NEW:** Implement "Add Notebook" and "Add Notes" buttons with yellow styling matching Figma design
 12. **NEW:** Create modal dialog infrastructure for notebook and note creation
 13. **NEW:** Add modal overlay and positioning system for consistent UX
-
-### Story 1.4 CR1: Home Header Branding — Display “Biblion 1.0”
-
-As a user,
-I want the Home screen header to clearly display the product name and version,
-so that I can recognize I’m using the correct app build.
-
-Acceptance Criteria:
-
-1. Home screen header label shows “Biblion 1.0”.
-2. Label persists across navigation (`Home`, `Settings`, `Help`).
-3. Label persists across page reloads.
-4. Styling follows existing theme without layout regressions.
-5. The label is sourced from a single constant (single source of truth).
