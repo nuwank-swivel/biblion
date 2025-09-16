@@ -64,3 +64,19 @@ Acceptance Criteria:
 11. **NEW:** Implement "Add Notebook" and "Add Notes" buttons with yellow styling matching Figma design
 12. **NEW:** Create modal dialog infrastructure for notebook and note creation
 13. **NEW:** Add modal overlay and positioning system for consistent UX
+14. **NEW:** Home/App header displays centralized app name constant (see Story 1.4)
+
+### Story 1.4: Home screen shows app name as "Biblion 1.0"
+
+As a user,
+I want the home screen/header to display the correct app name "Biblion 1.0",
+so that branding is consistent and I know I’m using the current version.
+
+Acceptance Criteria:
+
+1. Primary header on the home screen displays title "Biblion 1.0".
+2. App name sourced from a single configuration constant to avoid duplication.
+3. Title uses existing Material UI typography/theming matching spacing and color rules.
+4. Name appears consistently in the header bar and browser/page title where applicable.
+5. Unit tests verify rendered text and configuration source.
+6. Update screenshots/docs to reflect the new name with Figma reference.
