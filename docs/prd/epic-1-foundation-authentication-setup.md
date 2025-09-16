@@ -64,3 +64,17 @@ Acceptance Criteria:
 11. **NEW:** Implement "Add Notebook" and "Add Notes" buttons with yellow styling matching Figma design
 12. **NEW:** Create modal dialog infrastructure for notebook and note creation
 13. **NEW:** Add modal overlay and positioning system for consistent UX
+
+### Story 1.4: Home Screen Branding – Display "Biblion 1.0"
+
+As a user,
+I want the home screen to display the application name and version as "Biblion 1.0",
+so that I can clearly identify the product and version I am using.
+
+Acceptance Criteria:
+
+1. Home screen header/title renders the text "Biblion 1.0" exactly
+2. Browser tab/document title shows "Biblion 1.0"
+3. Any visible home-screen references to the product name reflect "Biblion 1.0"
+4. Typography, color, and spacing align with the Figma reference
+5. Component/UI tests verify presence of "Biblion 1.0" on home screen
